@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    "competition.apps.CompetitionConfig"
 ]
 
 MIDDLEWARE = [
@@ -130,7 +132,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-#AUTH_USER_MODEL = 'competition.User'
+AUTH_USER_MODEL = 'competition.User'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
