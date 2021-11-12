@@ -65,7 +65,7 @@ class PhotoPost(models.Model):
         default=PhotoPostState.NEW,
         verbose_name='Состояние поста',
         choices=PhotoPostState.CHOICES,
-        protected=True,
+        #protected=True,
     )
 
     published_date = models.DateTimeField(verbose_name='Дата публикации', null=True)

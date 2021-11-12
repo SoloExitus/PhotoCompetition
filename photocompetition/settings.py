@@ -39,7 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    "competition.apps.CompetitionConfig"
+    'imagekit',
+    'django_fsm',
+    'rest_framework',
+    'django_filters',
+
+    'competition.apps.CompetitionConfig',
 ]
 
 MIDDLEWARE = [
@@ -129,6 +134,10 @@ USE_L10N = True
 
 USE_TZ = True
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
 
 STATIC_URL = '/static/'
 
