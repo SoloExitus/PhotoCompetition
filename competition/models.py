@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -32,13 +33,13 @@ class User(AbstractUser):
         return self.username
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email = models.EmailField()
-    avatar = models.ImageField(upload_to='avatars', default='avatars/default.jpg')
-
-    def __str__(self):
-        return f"Profile of user:{self.user.username}"
+# class UserProfile(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     email = models.EmailField()
+#     avatar = models.ImageField(upload_to='avatars', default='avatars/default.jpg')
+#
+#     def __str__(self):
+#         return f"Profile of user:{self.user.username}"
 
 
 class PhotoPostState(object):
@@ -56,7 +57,7 @@ class PhotoPostState(object):
 
 
 class PhotoPost(models.Model):
-    user = models.ForeignKey(UserProfile, verbose_name='Автор', on_delete=models.CASCADE, related_name='posts')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='Автор', on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=256, verbose_name='Название поста')
     description = models.TextField(verbose_name='Описание поста', blank=True)
 
@@ -110,7 +111,13 @@ class PhotoPost(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(UserProfile, verbose_name='Автор', on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name='Автор',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+
     text = models.TextField(verbose_name='Текст комментария')
     created_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
@@ -134,7 +141,13 @@ class Comment(models.Model):
 
 
 class Like(models.Model):
-    user = models.ForeignKey(UserProfile, verbose_name='Автор', on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name='Автор',
+        on_delete=models.CASCADE,
+        related_name='likes'
+    )
+
     post = models.ForeignKey(PhotoPost, verbose_name='Пост', on_delete=models.CASCADE, related_name='likes')
 
     class Meta:
