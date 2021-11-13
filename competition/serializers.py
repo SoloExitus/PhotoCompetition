@@ -20,28 +20,34 @@ class PhotoPostListSerializer(ModelSerializer):
         fields = ('id', 'title', 'description', 'published_date', 'full_image', 'likes_count', 'comments_count', 'author')
 
 
-class CommentChildrenSerializer(ModelSerializer):
+class CommentSerializer(ModelSerializer):
+    author = UserSerializer(source='user')
+    comment_children = serializers.SerializerMethodField()
+
+    def get_comment_children(self, obj):
+        if obj.comment_children is not None:
+            return CommentSerializer(obj.comment_children, many=True).data
+        else:
+            return None
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'text', 'created_date', 'children')
+        fields = ('id', 'author', 'text', 'created_date', 'comment_children')
 
 
-class CommentListSerializer(ModelSerializer):
-    author = UserSerializer(source='user')
-    children = CommentChildrenSerializer(many=True)
-
-    class Meta:
-        model = Comment
-        fields = ('id',  'author', 'text', 'created_date', 'children')
-
-
-class PhotoPostDetailSerializer(ModelSerializer):
-    likes_count = serializers.IntegerField(read_only=True)
-    comments_count = serializers.IntegerField(read_only=True)
-    author = UserSerializer(source='user')
-    comments = CommentListSerializer()
+class PhotoPostDetailSerializer(PhotoPostListSerializer):
+    comments = CommentSerializer(many=True)
 
     class Meta:
         model = PhotoPost
-        fields = ('id', 'title', 'description', 'published_date', 'full_image', 'likes_count', 'comments_count', 'author', 'comments')
+        fields = (
+            'id',
+            'title',
+            'description',
+            'full_image',
+            'published_date',
+            'likes_count',
+            'comments_count',
+            'author',
+            'comments',
+        )

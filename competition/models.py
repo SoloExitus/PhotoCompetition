@@ -130,14 +130,14 @@ class Comment(models.Model):
         on_delete=models.CASCADE
     )
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    object_id = models.PositiveIntegerField(null=True)
 
     class Meta:
         ordering = ('created_date',)
 
     def __str__(self):
-        return self.id
+        return f"{self.id}"
 
 
 class Like(models.Model):
