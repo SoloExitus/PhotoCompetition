@@ -80,7 +80,7 @@
     <script>
         $(document).ready(function() {
         $.ajax({
-          url: "{% url 'post-list' %}",
+          url: "{% url 'gallery-list' %}",
           type: "GET",
           dataType: "json",
            success: (data) => {

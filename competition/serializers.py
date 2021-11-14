@@ -17,7 +17,16 @@ class PhotoPostListSerializer(ModelSerializer):
 
     class Meta:
         model = PhotoPost
-        fields = ('id', 'title', 'description', 'published_date', 'full_image', 'likes_count', 'comments_count', 'author')
+        fields = (
+            'id',
+            'title',
+            'description',
+            'published_date',
+            'full_image', 'state',
+            'likes_count',
+            'comments_count',
+            'author'
+        )
 
 
 class CommentSerializer(ModelSerializer):
