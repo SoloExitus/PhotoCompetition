@@ -9,9 +9,9 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_thumbnail', 'username', 'email')
 
     def get_thumbnail(self, obj):
-        return mark_safe(f'<img src={obj.thumbnail.url} with="100" height="100">')
+         return mark_safe(f'<img src={obj.thumbnail.url} with="100" height="100">')
 
-    get_thumbnail.short_description = 'иниатюра аватара пользователя'
+    get_thumbnail.short_description = 'миниатюра аватара пользователя'
 
 
 @admin.register(PhotoPost)

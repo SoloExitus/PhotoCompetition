@@ -12,7 +12,8 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
 
     thumbnail = ProcessedImageField(
-        upload_to='user_thumbnail',
+        upload_to='user_thumbnail/',
+        default='user_thumbnail/default.jpg',
         processors=[ResizeToFill(100, 100)],
         format='JPEG',
         options={'quality': 100},
