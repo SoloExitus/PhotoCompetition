@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/', include('photocompetition.api')),
     path('', include('competition.urls')),
     path('', include('social_django.urls', namespace='social')),
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]
 
 if settings.DEBUG:

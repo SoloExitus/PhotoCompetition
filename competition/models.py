@@ -20,6 +20,8 @@ class User(AbstractUser):
         verbose_name='Миниатура пользователя',
     )
 
+    profile_image = models.CharField(max_length=256, null=True, blank=True)
+
     # profile_pictures = models.ImageField(
     #         null=True,
     #         blank=True,
