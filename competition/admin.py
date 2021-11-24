@@ -28,11 +28,13 @@ class PhotoPostAdmin(admin.ModelAdmin):
     search_fields = ('id', 'title', 'status', 'description', 'published_date')
 
 
+
+
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'text', 'created_date', 'parent')
-    list_display_links = ('id', 'text', 'created_date', 'parent')
-    search_fields = ('text', 'created_date')
+    list_display = ('id', 'user', 'text', 'created', 'updated', 'parent')
+    list_display_links = ('id', 'user', 'text', 'created', 'updated', 'parent')
+    search_fields = ('user', 'text', 'created', 'updated')
 
 
 @admin.register(Like)

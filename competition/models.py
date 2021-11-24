@@ -13,7 +13,7 @@ class User(AbstractUser):
 
     thumbnail = ProcessedImageField(
         upload_to='user_thumbnail/',
-        default='user_thumbnail/default.jpg',
+        default='placeholders/avatar_placeholder.jpg',
         processors=[ResizeToFill(100, 100)],
         format='JPEG',
         options={'quality': 100},
@@ -71,8 +71,9 @@ class PhotoPost(models.Model):
         #protected=True,
     )
 
-    published_date = models.DateTimeField(verbose_name='Дата публикации', null=True)
-    remove_date = models.DateTimeField(verbose_name='Дата удаления', null=True)
+    published = models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации')
+    updated = models.DateTimeField(auto_now=True, verbose_name='Дата последнего изменения')
+    removed = models.DateTimeField(auto_now_add=True, verbose_name='Дата удаления')
 
     full_image = models.ImageField(verbose_name='Полное изображение', upload_to='photo/')
 
@@ -83,7 +84,11 @@ class PhotoPost(models.Model):
         options={'quality': 100},
     )
 
-    previous_image = models.ImageField(null=True, verbose_name='Предыдущее используемое изображение', upload_to='photo/')
+    previous_image = models.ImageField(
+        upload_to='photo/',
+        default='placeholders/photo_placeholder.png',
+        verbose_name='Предыдущее используемое изображение')
+
     comments = GenericRelation('comment')
 
     def __str__(self):
@@ -122,7 +127,7 @@ class Comment(models.Model):
     )
 
     text = models.TextField(verbose_name='Текст комментария')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     parent = models.ForeignKey(
         'self',
@@ -137,10 +142,10 @@ class Comment(models.Model):
     object_id = models.PositiveIntegerField(null=True)
 
     class Meta:
-        ordering = ('created_date',)
+        ordering = ('created',)
 
     def __str__(self):
-        return f"{self.id}"
+        return f'Comment by {self.user}'
 
 
 class Like(models.Model):

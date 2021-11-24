@@ -1,0 +1,123 @@
+{% extends 'competition/gallery.html' %}
+
+
+{% block main %}
+<!-- Page Content -->
+
+    <div class="row text-center text-lg-start post-container">
+
+    </div>
+
+    <div class="container card my-4 py-5">
+      <div class="row d-flex justify-content-center comments-container">
+      </div>
+    </div>
+
+{% endblock main %}
+
+{% block customjs %}
+<script>
+    $(document).ready(function() {
+    $.ajax({
+      url: "{% url 'api:gallery-detail' post_id  %}",
+      type: "GET",
+      dataType: "json",
+       success: (postData) => {
+
+          const gallery = $(".post-container");
+          gallery.empty()
+
+            const post = `
+            <div class="">
+                <div>${postData.title}</div>
+                <img class="img-fluid img-thumbnail" src="${postData.full_image}" alt="${postData.title}">
+                <div>
+                    <p>
+                        likes: ${postData.likes_count}
+                        comments: ${postData.comments_count}
+                    </p>
+                </div>
+                <div>
+                    Description:
+                    <p>
+                    ${postData.description}
+                    </p>
+                </div>
+            </div>`
+
+            gallery.append(post);
+
+            const comments= $(".comments-container");
+
+            function renderComment(comment) {
+                let render = document.createElement('div');
+                render.classList.add('d-flex', 'flex-start', `comment-${ comment.id }`)
+                render.innerHTML = `
+                <img
+                    class="rounded-circle shadow-1-strong me-3"
+                    src="${ comment.author.profile_image || comment.author.thumbnail }"
+                    alt="avatar"
+                    width="65"
+                    height="65"
+                />`
+                let content = document.createElement('div');
+                content.classList.add('flex-grow-1', 'flex-shrink-1')
+                content.innerHTML = `
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <p class="mb-1">
+                                ${ comment.author.username } <span class="small">- ${ comment.created }</span>
+                            </p>
+                            {% if request.user.is_authenticated %}
+                                <span href="#"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></span>
+                                <form></form>
+                            {% endif %}
+                        </div>
+                        <p class="small mb-0">
+                            ${ comment.text }
+                        </p>
+                    </div>
+                           `
+
+
+
+                if (comment.comment_children){
+                    let children = document.createElement('div');
+                    children.classList.add(`children-comments-${ comment.id }`);
+                    comment.comment_children.forEach(chcom => {
+                        children.append(renderComment(chcom));
+                    })
+                    content.append(children);
+                }
+
+
+                render.append(content);
+                return render;
+            }
+
+            if (comments)
+            {
+                postData.comments.forEach(comment=>{
+                    comments.append(renderComment(comment));
+                })
+
+                if (postData.comments.length == 0)
+                {
+                    comments.append(`<div> No comments, be the first </div>`);
+                }
+            }else
+            {
+
+            }
+
+
+
+
+        },
+          error: (error) => {
+            console.log(error);
+          }
+    });
+    });
+</script>
+{% endblock customjs %}

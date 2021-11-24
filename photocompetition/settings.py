@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from decouple import config
 
@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django_fsm',
     'rest_framework',
     'social_django',
+    'crispy_forms',
+    'service_objects',
 
     'django_filters',
 
@@ -178,6 +180,8 @@ REST_FRAMEWORK = {
 }
 
 STATIC_URL = '/static/'
+Static_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = []
 
 AUTH_USER_MODEL = 'competition.User'
 
@@ -185,3 +189,5 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
