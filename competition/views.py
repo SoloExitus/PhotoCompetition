@@ -77,6 +77,9 @@ class UserPostViewSet(viewsets.ModelViewSet):
         serializer.save(**kwargs)
 
     def create(self, request, *args, **kwargs):
+        import pdb
+
+        pdb.set_trace()
         #request.data['author'] = self.request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -85,20 +88,20 @@ class UserPostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class PhotoPostCreateView(CreateView):
-
-    model = PhotoPost
-    success_url = reverse_lazy('profile-list')
-    fields = ['title', 'description', 'full_image']
-    template_name = 'competition/photopostcreate.html'
-
-
-
-# class PhotoPostCreateView(TemplateView):
-#     template_name = "competition/photopostcreate.html"
+# class PhotoPostCreateView(CreateView):
 #
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['pageTitle'] = 'Create Post'
-#         context['form'] = PostForm()
-#         return context
+#     model = PhotoPost
+#     success_url = reverse_lazy('profile-list')
+#     fields = ['title', 'description', 'full_image']
+#     template_name = 'competition/photopostcreate.html'
+
+
+
+class PhotoPostCreateView(TemplateView):
+    template_name = "competition/photopostcreate.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pageTitle'] = 'Create Post'
+        context['form'] = PostForm()
+        return context

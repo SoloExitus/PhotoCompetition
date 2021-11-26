@@ -25,16 +25,14 @@ class PhotoPostAdmin(admin.ModelAdmin):
     def get_preview_image(self, obj):
         return mark_safe(f'<img src={obj.preview_image.url} with="300" height="300">')
 
-    search_fields = ('id', 'title', 'status', 'description', 'published_date')
-
-
+    search_fields = ('id', 'title', 'status', 'description', 'published_at')
 
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'text', 'created', 'updated', 'parent')
-    list_display_links = ('id', 'user', 'text', 'created', 'updated', 'parent')
-    search_fields = ('user', 'text', 'created', 'updated')
+    list_display = ('id', 'user', 'text', 'created_at', 'parent')
+    list_display_links = ('id', 'user', 'text', 'created_at', 'parent')
+    search_fields = ('user', 'text', 'created_at')
 
 
 @admin.register(Like)

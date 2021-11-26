@@ -71,9 +71,9 @@ class PhotoPost(models.Model):
         #protected=True,
     )
 
-    published = models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации')
-    updated = models.DateTimeField(auto_now=True, verbose_name='Дата последнего изменения')
-    removed = models.DateTimeField(auto_now_add=True, verbose_name='Дата удаления')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    published_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата последнего изменения')
 
     full_image = models.ImageField(verbose_name='Полное изображение', upload_to='photo/')
 
@@ -88,8 +88,6 @@ class PhotoPost(models.Model):
         upload_to='photo/',
         default='placeholders/photo_placeholder.png',
         verbose_name='Предыдущее используемое изображение')
-
-    comments = GenericRelation('comment')
 
     def __str__(self):
         return self.title
@@ -127,7 +125,7 @@ class Comment(models.Model):
     )
 
     text = models.TextField(verbose_name='Текст комментария')
-    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     parent = models.ForeignKey(
         'self',
@@ -138,11 +136,10 @@ class Comment(models.Model):
         on_delete=models.CASCADE
     )
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    object_id = models.PositiveIntegerField(null=True)
+    post = models.ForeignKey(PhotoPost, verbose_name='Пост', on_delete=models.CASCADE, related_name='comments')
 
     class Meta:
-        ordering = ('created',)
+        ordering = ('created_at',)
 
     def __str__(self):
         return f'Comment by {self.user}'

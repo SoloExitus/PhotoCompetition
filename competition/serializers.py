@@ -17,9 +17,9 @@ class PhotoPostListSerializer(ModelSerializer):
 
     class Meta:
         model = PhotoPost
-        fields = ['id', 'title', 'description', 'published', 'updated', 'full_image', 'state', 'likes_count',
+        fields = ['id', 'title', 'description', 'published_at', 'updated_at', 'full_image', 'state', 'likes_count',
                   'comments_count', 'author']
-        read_only_fields = ['published', 'updated', 'state', 'likes_count', 'comments_count', 'author']
+        read_only_fields = ['published_at', 'updated_at', 'state', 'likes_count', 'comments_count', 'author']
 
 
 class CommentSerializer(ModelSerializer):
@@ -34,7 +34,7 @@ class CommentSerializer(ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'text', 'created', 'updated', 'comment_children')
+        fields = ('id', 'author', 'text', 'created_at', 'updated_at', 'comment_children')
 
 
 class PhotoPostDetailSerializer(PhotoPostListSerializer):
@@ -47,7 +47,7 @@ class PhotoPostDetailSerializer(PhotoPostListSerializer):
             'title',
             'description',
             'full_image',
-            'published',
+            'published_at',
             'likes_count',
             'comments_count',
             'author',
