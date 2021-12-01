@@ -7,7 +7,7 @@ from .models import PhotoPost, User, Comment
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'thumbnail', 'profile_image')
+        fields = ('id', 'username', 'email', 'profile_image')
 
 
 class PhotoPostListSerializer(ModelSerializer):

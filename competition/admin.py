@@ -9,12 +9,9 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_image', 'username', 'email')
 
     def get_image(self, obj):
-        url = obj.thumbnail.url
-        if obj.profile_image :
-            url = obj.profile_image
-        return mark_safe(f'<img src={url} with="100" height="100">')
+        return mark_safe(f'<img src={obj.profile_image} with="100" height="100">')
 
-    get_image.short_description = 'миниатюра аватара пользователя'
+    get_image.short_description = 'user profile image'
 
 
 @admin.register(PhotoPost)
@@ -23,7 +20,7 @@ class PhotoPostAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'title', 'get_preview_image', 'description')
 
     def get_preview_image(self, obj):
-        return mark_safe(f'<img src={obj.preview_image.url} with="300" height="300">')
+        return mark_safe(f'<img src={obj.preview_image.url} with="400" height="400">')
 
     search_fields = ('id', 'title', 'status', 'description', 'published_at')
 

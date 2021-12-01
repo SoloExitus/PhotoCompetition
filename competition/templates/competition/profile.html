@@ -2,8 +2,8 @@
 
 {% load static %}
 {% block main %}
-<div class="row justify-content-around gallery">
-    </div>
+<div class="post-container row justify-content-around gallery">
+</div>
 
 {% endblock main %}
 
@@ -23,7 +23,7 @@
           data.forEach(postData => {
 
             const post = `
-            <div class=" col-md-4 col-6 card" >
+            <div class="post-${postData.id} col-md-4 col-6 card" >
                 <div class="card-header">
                     ${postData.title}
 
@@ -32,12 +32,16 @@
                     </a>
                 </div>
                 <div class="card-body container">
-                    <div class="d-flex flex-row justify-content-between">
+                    <div class="d-flex flex-row justify-content-around">
                         <div class="block">
                             <img src="{% static '/img/like.png' %}" width="20px"> ${postData.likes_count}
                         </div>
                         <div class="block">
                             <img src="{% static '/img/chat.png' %}" width="20px">${postData.comments_count}
+                        </div>
+                        <div class="block button">
+                            <img src="{% static '/img/delete.png' %}" width="20px">
+                            <button type="button" class="btn btn-danger" onclick = 'remove(${postData.id})'>Remove</button>
                         </div>
                     </div>
                 </div>
@@ -50,7 +54,43 @@
           error: (error) => {
             console.log(error);
           }
+        });
     });
-    });
+
+
+    function remove(postId){
+        url = "{% url 'api:profile-detail' 0 %}".slice(0, -2)
+        let csrftoken = getCookie('csrftoken');
+        $.ajax({
+            url: url + postId + "/",
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            type: 'DELETE',
+            success: (data) => {
+                $(`.post-${postId}`).remove()
+                //$(".post-container").remove($(`.post${postId}`));
+            },
+            error: (error) => {
+                console.log(error);
+            }
+        });
+    }
+
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 </script>
 {% endblock customjs %}

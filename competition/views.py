@@ -71,30 +71,21 @@ class UserPostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         kwargs = {
             'user': self.request.user,
-            'author': self.request.user
+            #'author': self.request.user
         }
 
         serializer.save(**kwargs)
 
     def create(self, request, *args, **kwargs):
-        import pdb
+        #import pdb
 
-        pdb.set_trace()
+        #pdb.set_trace()
         #request.data['author'] = self.request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-# class PhotoPostCreateView(CreateView):
-#
-#     model = PhotoPost
-#     success_url = reverse_lazy('profile-list')
-#     fields = ['title', 'description', 'full_image']
-#     template_name = 'competition/photopostcreate.html'
-
 
 
 class PhotoPostCreateView(TemplateView):

@@ -11,38 +11,12 @@ from pilkit.processors import ResizeToFill
 class User(AbstractUser):
     email = models.EmailField(unique=True)
 
-    thumbnail = ProcessedImageField(
-        upload_to='user_thumbnail/',
-        default='placeholders/avatar_placeholder.jpg',
-        processors=[ResizeToFill(100, 100)],
-        format='JPEG',
-        options={'quality': 100},
-        verbose_name='Миниатура пользователя',
-    )
-
-    profile_image = models.CharField(max_length=256, null=True, blank=True)
-
-    # profile_pictures = models.ImageField(
-    #         null=True,
-    #         blank=True,
-    #         default='default.jpg',
-    #         upload_to='profile_pictures',
-    #         verbose_name='profile picture',
-    #     )
+    profile_image = models.CharField(max_length=256, default="placeholders/avatar_placeholder.jpg")
 
     REQUIRED_FIELDS = ['email', 'password']
 
     def __str__(self) -> str:
         return self.username
-
-
-# class UserProfile(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     email = models.EmailField()
-#     avatar = models.ImageField(upload_to='avatars', default='avatars/default.jpg')
-#
-#     def __str__(self):
-#         return f"Profile of user:{self.user.username}"
 
 
 class PhotoPostState(object):
@@ -60,22 +34,26 @@ class PhotoPostState(object):
 
 
 class PhotoPost(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='Автор', on_delete=models.CASCADE, related_name='posts')
-    title = models.CharField(max_length=256, verbose_name='Название поста')
-    description = models.TextField(verbose_name='Описание поста', blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name='Author',
+        on_delete=models.CASCADE,
+        related_name='posts'
+    )
+
+    title = models.CharField(max_length=256)
+    description = models.TextField(blank=True)
 
     state = FSMField(
         default=PhotoPostState.NEW,
-        verbose_name='Состояние поста',
         choices=PhotoPostState.CHOICES,
-        #protected=True,
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    published_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата последнего изменения')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Create date')
+    published_at = models.DateTimeField(auto_now_add=True, verbose_name='Publish date')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Last update date')
 
-    full_image = models.ImageField(verbose_name='Полное изображение', upload_to='photo/')
+    full_image = models.ImageField(verbose_name='Full image', upload_to='photo/')
 
     preview_image = ImageSpecField(
         source='full_image',
@@ -87,7 +65,8 @@ class PhotoPost(models.Model):
     previous_image = models.ImageField(
         upload_to='photo/',
         default='placeholders/photo_placeholder.png',
-        verbose_name='Предыдущее используемое изображение')
+        verbose_name='Previous image'
+    )
 
     def __str__(self):
         return self.title
@@ -119,24 +98,23 @@ class PhotoPost(models.Model):
 class Comment(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name='Автор',
+        verbose_name='Author',
         on_delete=models.CASCADE,
         related_name='comments'
     )
 
-    text = models.TextField(verbose_name='Текст комментария')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    post = models.ForeignKey(PhotoPost, on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Create date')
 
     parent = models.ForeignKey(
         'self',
-        verbose_name='Родительский комментарий',
+        verbose_name='Parent comment',
         blank=True,
         null=True,
         related_name='comment_children',
         on_delete=models.CASCADE
     )
-
-    post = models.ForeignKey(PhotoPost, verbose_name='Пост', on_delete=models.CASCADE, related_name='comments')
 
     class Meta:
         ordering = ('created_at',)
@@ -148,12 +126,12 @@ class Comment(models.Model):
 class Like(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name='Автор',
+        verbose_name='Author',
         on_delete=models.CASCADE,
         related_name='likes'
     )
 
-    post = models.ForeignKey(PhotoPost, verbose_name='Пост', on_delete=models.CASCADE, related_name='likes')
+    post = models.ForeignKey(PhotoPost, on_delete=models.CASCADE, related_name='likes')
 
     class Meta:
         unique_together = ('user', 'post')
