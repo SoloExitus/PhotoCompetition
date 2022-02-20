@@ -14,7 +14,11 @@
         {% if request.user.is_authenticated %}
         <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
             {{ request.user.username }}
+            {% if backends.associated %}
                 <img src="{{ request.user.profile_image }}" alt="thumbnail" width="32" height="32" class="rounded-circle">
+            {% else %}
+                <img src="static/{{ request.user.profile_image }}" alt="thumbnail" width="32" height="32" class="rounded-circle">
+            {% endif %}
         </a>
       <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
         <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
@@ -44,6 +48,9 @@
 
 {% block customjs %}
 <script>
+    urlInactiveLike = "{% static '/img/like.png' %}";
+    urlActiveLike = "{% static '/img/like_active.png' %}";
+
     $(document).ready(function() {
     $.ajax({
       url: "{% url 'api:gallery-list' %}",
@@ -57,6 +64,12 @@
 
           data.forEach(postData => {
 
+
+            let LikeUrl = urlInactiveLike;
+
+              if (postData.is_liked)
+                  LikeUrl = urlActiveLike;
+
             const post = `
             <div class=" col-md-4 col-6 card" >
                 <div class="card-header">
@@ -66,20 +79,13 @@
                         <img class="img-fluid img-thumbnail" src="${postData.full_image}"  width="100%" alt="${postData.title}">
                     </a>
                 </div>
-                <div class="card-body container">
-                    <div class="d-flex flex-row justify-content-between">
-                        <div class="block">
-                            <img src="{% static '/img/like.png' %}" width="20px"> ${postData.likes_count}
-                        </div>
-                        <div class="block">
-                            <img src="{% static '/img/chat.png' %}" width="20px">${postData.comments_count}
-                        </div>
-                    </div>
+                <div id="post-${postData.id}-info" class="card-body container">
                 </div>
 
             </div>`
 
             gallery.append(post);
+            SetPhotoPostInfo(postData.id, postData);
           });
         },
           error: (error) => {
@@ -87,5 +93,84 @@
           }
     });
     });
+
+    function SetPhotoPostInfo(post_id, data)
+    {
+        const post = $(`#post-${post_id}-info`);
+
+        let LikeUrl = urlInactiveLike;
+        let Func = 'likepost'
+
+              if (data.is_liked)
+              {
+                  LikeUrl = urlActiveLike;
+                  Func = 'unlikepost'
+              }
+
+
+        post.empty()
+        const entry = `
+        <div class="d-flex flex-row justify-content-between">
+            <button class="btn" onclick = '${Func}(${post_id})'>
+                <div class="block">
+                    <img src=${LikeUrl} width="20px">
+                    <span> ${data.total_likes} </span>
+                </div>
+            </button>
+            <div class="block">
+                <img src="{% static '/img/chat.png' %}" width="20px"> <span>${data.total_comments}</span>
+            </div>
+        </div>
+        `;
+        post.append(entry);
+
+    }
+
+    function likepost(post_id)
+    {
+        urlquery = "{% url 'api:gallery-like' 0 %}".slice(0, -6)
+
+        let csrftoken = getCookie('csrftoken');
+        $.ajax({
+            url: urlquery + post_id + '/like/',
+            type: "POST",
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: (data) => {
+                SetPhotoPostInfo(post_id, data);
+                console.log(data);
+            },
+            error: (error) => {
+                console.log(error);
+            }
+
+        });
+    }
+
+    function unlikepost(post_id)
+    {
+        urlquery = "{% url 'api:gallery-unlike' 0 %}".slice(0, -9)
+
+        let csrftoken = getCookie('csrftoken');
+        $.ajax({
+            url: urlquery + post_id + '/unlike/',
+            type: "POST",
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: (data) => {
+                SetPhotoPostInfo(post_id, data);
+                console.log(data);
+            },
+            error: (error) => {
+                console.log(error);
+            }
+
+        });
+    }
+
+
+
 </script>
 {% endblock customjs %}

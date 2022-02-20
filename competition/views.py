@@ -1,17 +1,21 @@
 import django_filters
-from django import forms
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count
-from django.views.generic import CreateView, UpdateView
+from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view, renderer_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
 
+from competition import services
 from competition.forms import PostForm
-from competition.models import PhotoPost, PhotoPostState
-from competition.permissions import AuthorAllStaffChange
-from competition.serializers import PhotoPostListSerializer, PhotoPostDetailSerializer
+from competition.models import PhotoPost, PhotoPostState, Like
+from competition.permissions import AuthorAllStaffChange, AuthUserButNotAuthorOrStuffOrSuper
+from competition.serializers import PhotoPostListSerializer, PhotoPostDetailSerializer, PhotoPostInfoSerializer
+from competition.mixins import LikePostMixin
 
 
 class HomePageView(TemplateView):
@@ -41,14 +45,11 @@ class ProfileView(TemplateView):
         return context
 
 
-class GalleryViewSet(viewsets.ReadOnlyModelViewSet):
+class GalleryViewSet(LikePostMixin, viewsets.ReadOnlyModelViewSet):
     """
-     provides `list` and `retrieve` actions.
+     provides default `list` and `retrieve` actions and like/unlike actions.
     """
-    queryset = PhotoPost.objects.filter(state=PhotoPostState.APPROVED).annotate(
-            likes_count=Count('likes', distinct=True),
-            comments_count=Count('comments', distinct=True),
-    )
+    queryset = PhotoPost.objects.filter(state=PhotoPostState.APPROVED)
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -58,38 +59,27 @@ class GalleryViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class UserPostViewSet(viewsets.ModelViewSet):
-    permission_classes = (AuthorAllStaffChange,)
+    permission_classes = [AuthorAllStaffChange]
     serializer_class = PhotoPostListSerializer
 
     def get_queryset(self):
         user = self.request.user
-        return PhotoPost.objects.filter(user=user).annotate(
-            likes_count=Count('likes', distinct=True),
-            comments_count=Count('comments', distinct=True),
-        )
-
-    def perform_create(self, serializer):
-        kwargs = {
-            'user': self.request.user,
-            #'author': self.request.user
-        }
-
-        serializer.save(**kwargs)
+        return PhotoPost.objects.filter(user=user)
 
     def create(self, request, *args, **kwargs):
         #import pdb
 
         #pdb.set_trace()
-        #request.data['author'] = self.request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        serializer.save(user=request.user)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class PhotoPostCreateView(TemplateView):
     template_name = "competition/photopostcreate.html"
+    permission_classes = [IsAuthenticated]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

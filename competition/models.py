@@ -1,7 +1,5 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django_fsm import FSMField, transition
 from imagekit.models import ProcessedImageField, ImageSpecField
@@ -11,7 +9,7 @@ from pilkit.processors import ResizeToFill
 class User(AbstractUser):
     email = models.EmailField(unique=True)
 
-    profile_image = models.CharField(max_length=256, default="placeholders/avatar_placeholder.jpg")
+    profile_image = models.CharField(max_length=256, default="placeholders/avatar.jpg")
 
     REQUIRED_FIELDS = ['email', 'password']
 
@@ -64,9 +62,17 @@ class PhotoPost(models.Model):
 
     previous_image = models.ImageField(
         upload_to='photo/',
-        default='placeholders/photo_placeholder.png',
+        default='placeholders/postImage.png',
         verbose_name='Previous image'
     )
+
+    @property
+    def total_likes(self):
+        return self.likes.count()
+
+    @property
+    def total_comments(self):
+        return self.comments.count()
 
     def __str__(self):
         return self.title
