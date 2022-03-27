@@ -1,8 +1,10 @@
+from django.forms import Field
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ListSerializer
 
 from .models import PhotoPost, User, Comment
 from .services import is_liked_post
+
 
 class UserSerializer(ModelSerializer):
     class Meta:
@@ -41,23 +43,46 @@ class PhotoPostInfoSerializer(ModelSerializer):
         return is_liked_post(post, user)
 
 
-class CommentSerializer(ModelSerializer):
+class FilteredNestedCommentListSerializer(ListSerializer):
+
+    def to_representation(self, data):
+        data = data.filter(parent__isnull=True)
+        return super(FilteredNestedCommentListSerializer, self).to_representation(data)
+
+
+class NestedCommentSerializer(ModelSerializer):
     author = UserSerializer(source='user')
     comment_children = serializers.SerializerMethodField()
 
     def get_comment_children(self, comment):
         if comment.comment_children is not None:
-            return CommentSerializer(comment.comment_children, many=True).data
+            return NestedCommentSerializer(comment.comment_children, many=True).data
         else:
             return None
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'text', 'created_at', 'updated_at', 'comment_children')
+        fields = ('id', 'author', 'text', 'created_at', 'comment_children')
+
+
+class PostCommentSerializer(ModelSerializer):
+    author = UserSerializer(source='user')
+    comment_children = serializers.SerializerMethodField()
+
+    def get_comment_children(self, comment):
+        if comment.comment_children is not None:
+            return NestedCommentSerializer(comment.comment_children, many=True).data
+        else:
+            return None
+
+    class Meta:
+        model = Comment
+        list_serializer_class = FilteredNestedCommentListSerializer
+        fields = ('id', 'author', 'text', 'created_at', 'comment_children')
 
 
 class PhotoPostDetailSerializer(PhotoPostListSerializer):
-    comments = CommentSerializer(many=True)
+    comments = PostCommentSerializer(many=True)
 
     class Meta:
         model = PhotoPost

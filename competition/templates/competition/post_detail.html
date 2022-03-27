@@ -24,12 +24,13 @@
       dataType: "json",
        success: (postData) => {
 
+          console.log(postData)
           const gallery = $(".post-container");
           gallery.empty()
 
             const post = `
-            <div class="">
-                <div>${postData.title}</div>
+            <div class="block">
+                <h4>${postData.title}</h4>
                 <img class="img-fluid img-thumbnail" src="${postData.full_image}" alt="${postData.title}">
                 <div>
                     <p>
@@ -38,10 +39,10 @@
                     </p>
                 </div>
                 <div>
-                    Description:
-                    <p>
-                    ${postData.description}
-                    </p>
+                    <b>Description:</b><br>
+                    <span>
+                        ${postData.description}
+                    </span>
                 </div>
             </div>`
 
@@ -60,26 +61,32 @@
                     width="65"
                     height="65"
                 />`
+
                 let content = document.createElement('div');
-                content.classList.add('flex-grow-1', 'flex-shrink-1')
+                content.classList.add('flex-grow-1', 'flex-shrink-1');
+
                 content.innerHTML = `
                     <div>
                         <div class="d-flex justify-content-between align-items-center">
                             <p class="mb-1">
-                                ${ comment.author.username } <span class="small">- ${ comment.created }</span>
+                                <i>${ comment.author.username }</i>
+                                <span class="small">- ${ comment.created_at }</span>
                             </p>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-4">
+                                ${ comment.text }
+                            </div>
                             {% if request.user.is_authenticated %}
-                                <span href="#"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></span>
-                                <form></form>
+                            <div class="col-md-4 d-flex justify-content-end">
+                                <div class="row ml-0 mr-0">
+                                    <button href="#" class="btn btn-primary"> reply</button>
+                                </div>
+                            </div>
                             {% endif %}
                         </div>
-                        <p class="small mb-0">
-                            ${ comment.text }
-                        </p>
-                    </div>
-                           `
-
-
+                    </div>`
 
                 if (comment.comment_children){
                     let children = document.createElement('div');

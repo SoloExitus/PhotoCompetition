@@ -1,11 +1,11 @@
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title> {{ pageTitle }} </title>
-
+    <link rel="stylesheet" href="{% static 'css/style.css'%}" type="text/css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <!-- CSS only -->
@@ -33,35 +33,18 @@
 <div class="footer py-4">
     <div class="container-fluid text-center">
         {% block footer %}
-
-        <div>
-            <p>
-                Copyright ©<script>document.write(new Date().getFullYear());</script> - 2021 All rights reserved.
-            </p>
-        </div>
+            <div>
+                <p>
+                    Copyright © 2021 - <script>document.write(new Date().getFullYear());</script> All rights reserved.
+                </p>
+            </div>
         {% endblock footer %}
     </div>
 </div>
+    <script src="{% static 'js/base.js' %}"></script>
+
     {% block customjs %}
     {% endblock customjs %}
-
-    <script>
-        function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-    </script>
 
 <!-- Bootstrap js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
