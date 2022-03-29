@@ -12,26 +12,6 @@
 {% endblock main %}
 
 {% block customjs %}
-<!--<script>-->
-<!--    $(document).ready(function() {-->
-<!--        $('#form').submit(function(e) { // catch the form's submit event-->
-<!--            $.ajax({ // create an AJAX call...-->
-<!--                data: $(this).serialize(), // get the form data-->
-<!--                type: $(this).attr('GET'), // GET or POST-->
-<!--                url: $(this).attr("/api/profile/"), // the file to call-->
-<!--                success: function(response) { // on success.-->
-<!--                 $('#content').html(response); // update the DIV-->
-<!--                   // console.log(response);-->
-<!--                    //window.location.href = "{% url 'profile' %}"-->
-<!--                },-->
-<!--                error: (error) => {-->
-<!--                    console.log(error);-->
-<!--                }-->
-<!--            });-->
-<!--            return false;-->
-<!--        });-->
-<!--    });-->
-<!--</script>-->
 <script>
 $(document).ready(function() {
 

@@ -4,19 +4,23 @@
 {% block main %}
 <!-- Page Content -->
 
+
     <div class="row text-center text-lg-start post-container">
 
     </div>
 
-    <div class="container card my-4 py-5">
+    <div class="container card my-4 py-5 post-comments">
       <div class="row d-flex justify-content-center comments-container">
       </div>
+
     </div>
 
 {% endblock main %}
 
 {% block customjs %}
 <script>
+    let activeReplyBlock = null;
+
     $(document).ready(function() {
     $.ajax({
       url: "{% url 'api:gallery-detail' post_id  %}",
@@ -66,7 +70,6 @@
                 content.classList.add('flex-grow-1', 'flex-shrink-1');
 
                 content.innerHTML = `
-                    <div>
                         <div class="d-flex justify-content-between align-items-center">
                             <p class="mb-1">
                                 <i>${ comment.author.username }</i>
@@ -79,14 +82,19 @@
                                 ${ comment.text }
                             </div>
                             {% if request.user.is_authenticated %}
+
                             <div class="col-md-4 d-flex justify-content-end">
-                                <div class="row ml-0 mr-0">
-                                    <button href="#" class="btn btn-primary"> reply</button>
+                                <div class="mt-2 text-right">
+                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayReply(${comment.id})">reply</button>
                                 </div>
                             </div>
+
+                            <div class="comment-${comment.id}-reply-container">
+
+                            </div>
+
                             {% endif %}
-                        </div>
-                    </div>`
+                        </div>`
 
                 if (comment.comment_children){
                     let children = document.createElement('div');
@@ -108,17 +116,17 @@
                     comments.append(renderComment(comment));
                 })
 
-                if (postData.comments.length == 0)
-                {
-                    comments.append(`<div> No comments, be the first </div>`);
-                }
+                // if (postData.comments.length == 0)
+                // {
+                //     comments.append(`<div> No comments, be the first </div>`);
+                // }
             }else
             {
 
             }
 
 
-
+            PostCommentBlock(postData.id)
 
         },
           error: (error) => {
@@ -126,5 +134,71 @@
           }
     });
     });
+
+    function PostCommentBlock(id)
+    {
+        let block = document.createElement('div');
+        block.classList.add('bg-light', 'p-2');
+        block.innerHTML = `
+        <div class="d-flex flex-row align-items-start">
+                <textarea id="post-comment-textarea" class="form-control ml-1 shadow-none textarea"></textarea>
+            </div>
+            <div class="mt-2 text-right">
+                <button class="btn btn-primary btn-sm shadow-none" type="button" onClick='SendPostComment(${id})'>
+                    Comment
+                </button>
+            </div>`
+
+        let container = $(".post-comments");
+        container.append(block)
+
+    }
+
+    function ReplyCommentBlock(id)
+    {
+        let block = document.createElement('div');
+                block.classList.add('bg-light', 'p-2');
+                block.innerHTML = `
+                <div class="d-flex flex-row align-items-start">
+                        <textarea id="comment-${id}-reply-textarea" class="form-control ml-1 shadow-none textarea "></textarea>
+                    </div>
+                    <div class="mt-2 text-right">
+                        <button class="btn btn-primary btn-sm shadow-none" type="button" onClick='SendReplyComment(${id})'>
+                            Comment
+                        </button>
+                    </div>`
+
+        return block
+    }
+
+    function DisplayReply(id)
+    {
+        if (activeReplyBlock)
+            activeReplyBlock.empty()
+
+        let postReplyContainer = $(`.comment-${id}-reply-container`);
+        activeReplyBlock = postReplyContainer;
+
+        let block = ReplyCommentBlock(id);
+
+        activeReplyBlock.append(block)
+    }
+
+    function SendReplyComment(id)
+    {
+        const commentTextarea = document.getElementById(`comment-${id}-reply-textarea`);
+        let replyText = commentTextarea.value
+        console.log(id)
+        console.log(replyText)
+    }
+
+    function SendPostComment(id)
+    {
+        const commentTextarea = document.getElementById(`post-comment-textarea`);
+        let commentText = commentTextarea.value
+        console.log(id)
+        console.log(commentText)
+    }
+
 </script>
 {% endblock customjs %}

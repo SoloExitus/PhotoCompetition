@@ -2,6 +2,7 @@
 
 {% load static %}
 {% block header %}
+
     <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
       <li><a href="{% url 'main' %}" class="nav-link px-2 link-dark">Competition</a></li>
     </ul>
@@ -14,11 +15,7 @@
         {% if request.user.is_authenticated %}
         <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
             {{ request.user.username }}
-            {% if backends.associated %}
-                <img src="{{ request.user.profile_image }}" alt="thumbnail" width="32" height="32" class="rounded-circle">
-            {% else %}
-                <img src="static/{{ request.user.profile_image }}" alt="thumbnail" width="32" height="32" class="rounded-circle">
-            {% endif %}
+            <img src="{{ request.user.profile_image }}" alt="thumbnail" width="32" height="32" class="rounded-circle">
         </a>
       <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
         <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
@@ -48,8 +45,8 @@
 
 {% block customjs %}
     <script>
-        urlInactiveLike = "{% static '/img/like.png' %}";
-        urlActiveLike = "{% static '/img/like_active.png' %}";
+        let urlInactiveLikeImage = "{% static '/img/like.png' %}";
+        let urlActiveLikeImage = "{% static '/img/like_active.png' %}";
 
         $(document).ready(function() {
             $.ajax({
@@ -62,10 +59,10 @@
                   const urlpost= "{% url 'post' 0 %}".slice(0, -1);
 
                   data.forEach(postData => {
-                    let LikeUrl = urlInactiveLike;
+                    let LikeUrl = urlInactiveLikeImage;
 
                     if (postData.is_liked)
-                        LikeUrl = urlActiveLike;
+                        LikeUrl = urlActiveLikeImage;
 
                     const post = `
                         <div class=" col-md-4 col-6 card" >
@@ -95,18 +92,18 @@
         });
 
         function SetPhotoPostInfo(post_id, data) {
-            const post = $(`#post-${post_id}-info`);
+            const postInfo = $(`#post-${post_id}-info`);
 
-            let LikeUrl = urlInactiveLike;
+            let LikeUrl = urlInactiveLikeImage;
             let Func = 'likepost'
 
             if (data.is_liked)
             {
-              LikeUrl = urlActiveLike;
+              LikeUrl = urlActiveLikeImage;
               Func = 'unlikepost'
             }
 
-            post.empty();
+            postInfo.empty();
 
                 const entry = `
                     <div class="d-flex flex-row justify-content-between">
@@ -121,7 +118,7 @@
                         </div>
                     </div>`
 
-                post.append(entry);
+                postInfo.append(entry);
         }
 
         function likepost(post_id)

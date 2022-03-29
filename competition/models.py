@@ -9,7 +9,7 @@ from pilkit.processors import ResizeToFill
 class User(AbstractUser):
     email = models.EmailField(unique=True)
 
-    profile_image = models.CharField(max_length=256, default="placeholders/avatar.jpg")
+    profile_image = models.CharField(max_length=256, default="/static/placeholders/avatar.jpg")
 
     REQUIRED_FIELDS = ['email', 'password']
 
