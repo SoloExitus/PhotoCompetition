@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from service_objects.services import Service
-from .models import Like
+from .models import Like, Comment
 
 
 def like_post(post, user):
@@ -20,4 +20,8 @@ def is_liked_post(post, user) -> bool:
 
     likes = Like.objects.filter(post=post, user=user)
     return likes.exists()
+
+
+def comment_post(post, user, text):
+    Comment.objects.create(post=post, user=user, text=text)
 

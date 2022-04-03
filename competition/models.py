@@ -116,6 +116,7 @@ class Comment(models.Model):
     parent = models.ForeignKey(
         'self',
         verbose_name='Parent comment',
+        blank=True,
         null=True,
         related_name='comment_children',
         on_delete=models.CASCADE

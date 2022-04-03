@@ -1,6 +1,6 @@
 from django.forms import Field
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer, ListSerializer
+from rest_framework.serializers import ModelSerializer, ListSerializer, BaseSerializer
 
 from .models import PhotoPost, User, Comment
 from .services import is_liked_post
@@ -98,4 +98,13 @@ class PhotoPostDetailSerializer(PhotoPostListSerializer):
             'author',
             'comments',
         )
+
+
+class CommentsSerializer(ModelSerializer):
+    author = UserSerializer(source='user')
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'post', 'author', 'text', 'created_at')
+
 

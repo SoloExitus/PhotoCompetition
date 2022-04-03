@@ -176,7 +176,8 @@ USE_TZ = True
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
-    ]
+    ],
+    'DATETIME_FORMAT': "%d.%m.%Y %H:%M:%S",
 }
 
 STATIC_URL = '/static/'

@@ -20,6 +20,7 @@
 {% block customjs %}
 <script>
     let activeReplyBlock = null;
+    let detailPostId;
 
     $(document).ready(function() {
     $.ajax({
@@ -190,14 +191,56 @@
         let replyText = commentTextarea.value
         console.log(id)
         console.log(replyText)
+
+        urlquery = "{% url 'api:comment-list' %}".slice(0, -9)
+
+            let csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                url: urlquery + id + '/comment/',
+                type: "POST",
+                dataType: "json",
+                data: "text="+replyText,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: (data) => {
+                    console.log(data);
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
     }
 
     function SendPostComment(id)
     {
         const commentTextarea = document.getElementById(`post-comment-textarea`);
         let commentText = commentTextarea.value
-        console.log(id)
-        console.log(commentText)
+        //console.log(id)
+        //console.log(commentText)
+
+        urlquery = "{% url 'api:comment-list'%}"//.slice(0, -9)
+
+            let csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                url: urlquery,
+                type: "POST",
+                data: JSON.stringify({
+                    'post': 2,
+                    'text': commentText,
+                }),
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: (data) => {
+                    console.log(data);
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
     }
 
 </script>
