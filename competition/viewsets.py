@@ -50,6 +50,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
         #pdb.set_trace()
         print(request.data)
+        #request.data['user'] = request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)

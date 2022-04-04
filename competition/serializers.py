@@ -18,7 +18,7 @@ class PhotoPostListSerializer(ModelSerializer):
 
     class Meta:
         model = PhotoPost
-        fields = ['id', 'title', 'description', 'is_liked', 'published_at', 'updated_at', 'full_image', 'state',
+        fields = ['id', 'title', 'description', 'is_liked', 'published_at', 'updated_at', 'full_image','preview_image', 'state',
                   'total_likes', 'total_comments', 'author']
         read_only_fields = ['published_at', 'updated_at', 'state', 'likes_count', 'comments_count', 'author']
 
@@ -70,7 +70,7 @@ class PostCommentSerializer(ModelSerializer):
     comment_children = serializers.SerializerMethodField()
 
     def get_comment_children(self, comment):
-        if comment.comment_children is not None:
+        if comment.comment_children.exists():
             return NestedCommentSerializer(comment.comment_children, many=True).data
         else:
             return None
@@ -101,10 +101,10 @@ class PhotoPostDetailSerializer(PhotoPostListSerializer):
 
 
 class CommentsSerializer(ModelSerializer):
-    author = UserSerializer(source='user')
+    author = UserSerializer(source='user', read_only=True)
 
     class Meta:
         model = Comment
-        fields = ('id', 'post', 'author', 'text', 'created_at')
+        fields = ('id', 'post', 'author', 'text', 'parent', 'created_at')
 
 

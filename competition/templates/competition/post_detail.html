@@ -189,18 +189,21 @@
     {
         const commentTextarea = document.getElementById(`comment-${id}-reply-textarea`);
         let replyText = commentTextarea.value
-        console.log(id)
-        console.log(replyText)
+        //console.log(id)
+        //console.log(replyText)
 
-        urlquery = "{% url 'api:comment-list' %}".slice(0, -9)
+        urlquery = "{% url 'api:comment-list'%}"//.slice(0, -9)
 
             let csrftoken = getCookie('csrftoken');
 
             $.ajax({
-                url: urlquery + id + '/comment/',
+                url: urlquery,
                 type: "POST",
-                dataType: "json",
-                data: "text="+replyText,
+                data: {
+                    'post': 2,
+                    'text': replyText,
+                    'parent': 2,
+                },
                 headers: {
                     'X-CSRFToken': csrftoken
                 },
@@ -227,10 +230,10 @@
             $.ajax({
                 url: urlquery,
                 type: "POST",
-                data: JSON.stringify({
+                data: {
                     'post': 2,
                     'text': commentText,
-                }),
+                },
                 headers: {
                     'X-CSRFToken': csrftoken
                 },
