@@ -44,11 +44,11 @@ class AuthUserButNotAuthorOrStuffOrSuper(permissions.BasePermission):
         return False
 
 
-class IsAuthorComment(permissions.BasePermission):
+class IsAuthorCommentChange(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        return obj.user == request.user and not obj.comment_children.exists()

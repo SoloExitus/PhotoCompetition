@@ -19,43 +19,15 @@
 
 {% block customjs %}
 <script>
-    let activeReplyBlock = null;
-    let detailPostId;
+    let activeCommentActionBlockParent = null;
+    let detailPostId = {{ post_id }};
+    let commentUrl = "{% url 'api:comment-list'%}";
+    let csrftoken = getCookie('csrftoken');
+    let getPostDetailUrl ="{% url 'api:gallery-detail' post_id  %}";
 
-    $(document).ready(function() {
-    $.ajax({
-      url: "{% url 'api:gallery-detail' post_id  %}",
-      type: "GET",
-      dataType: "json",
-       success: (postData) => {
 
-          console.log(postData)
-          const gallery = $(".post-container");
-          gallery.empty()
-
-            const post = `
-            <div class="block">
-                <h4>${postData.title}</h4>
-                <img class="img-fluid img-thumbnail" src="${postData.full_image}" alt="${postData.title}">
-                <div>
-                    <p>
-                        likes: ${postData.total_likes}
-                        comments: ${postData.total_comments}
-                    </p>
-                </div>
-                <div>
-                    <b>Description:</b><br>
-                    <span>
-                        ${postData.description}
-                    </span>
-                </div>
-            </div>`
-
-            gallery.append(post);
-
-            const comments= $(".comments-container");
-
-            function renderComment(comment) {
+    function renderComment(comment)
+    {
                 let render = document.createElement('div');
                 render.classList.add('d-flex', 'flex-start', `comment-${ comment.id }`)
                 render.innerHTML = `
@@ -86,11 +58,11 @@
 
                             <div class="col-md-4 d-flex justify-content-end">
                                 <div class="mt-2 text-right">
-                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayReply(${comment.id})">reply</button>
+                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Reply')">reply</button>
                                 </div>
                             </div>
 
-                            <div class="comment-${comment.id}-reply-container">
+                            <div class="comment-${comment.id}-action-container">
 
                             </div>
 
@@ -109,25 +81,52 @@
 
                 render.append(content);
                 return render;
-            }
+    }
 
-            if (comments)
-            {
-                postData.comments.forEach(comment=>{
-                    comments.append(renderComment(comment));
-                })
+    function DisplayPostComments(postData)
+    {
+        const commentsContainer= $(".comments-container");
+        commentsContainer.empty();
 
-                // if (postData.comments.length == 0)
-                // {
-                //     comments.append(`<div> No comments, be the first </div>`);
-                // }
-            }else
-            {
+        postData.comments.forEach(comment=>{
+            commentsContainer.append(renderComment(comment));
+        })
+    }
 
-            }
+    $(document).ready(function() {
+    $.ajax({
+      url: getPostDetailUrl,
+      type: "GET",
+      dataType: "json",
+       success: (postData) => {
+
+          const postContainer = $(".post-container");
+          postContainer.empty()
 
 
-            PostCommentBlock(postData.id)
+            const post = `
+            <div class="block">
+                <h4>${postData.title}</h4>
+                <img class="img-fluid img-thumbnail" src="${postData.full_image}" alt="${postData.title}">
+                <div>
+                    <p>
+                        likes: ${postData.total_likes}
+                        comments: ${postData.total_comments}
+                    </p>
+                </div>
+                <div>
+                    <b>Description:</b><br>
+                    <span>
+                        ${postData.description}
+                    </span>
+                </div>
+            </div>`
+
+            postContainer.append(post);
+
+            DisplayPostComments(postData);
+
+            PostCommentBlock(postData.id);
 
         },
           error: (error) => {
@@ -155,60 +154,71 @@
 
     }
 
-    function ReplyCommentBlock(id)
+    function ActionCommentBlock(id, action)
     {
         let block = document.createElement('div');
                 block.classList.add('bg-light', 'p-2');
                 block.innerHTML = `
                 <div class="d-flex flex-row align-items-start">
-                        <textarea id="comment-${id}-reply-textarea" class="form-control ml-1 shadow-none textarea "></textarea>
+                        <textarea id="comment-${id}-action-textarea" class="form-control ml-1 shadow-none textarea "></textarea>
                     </div>
                     <div class="mt-2 text-right">
                         <button class="btn btn-primary btn-sm shadow-none" type="button" onClick='SendReplyComment(${id})'>
-                            Comment
+                            ${action}
                         </button>
                     </div>`
 
         return block
     }
 
-    function DisplayReply(id)
+    function DisplayCommentActionBlock(id, action)
     {
-        if (activeReplyBlock)
-            activeReplyBlock.empty()
+        if (activeCommentActionBlockParent)
+            activeCommentActionBlockParent.empty()
 
-        let postReplyContainer = $(`.comment-${id}-reply-container`);
-        activeReplyBlock = postReplyContainer;
+        commentActionContainer = $(`.comment-${id}-action-container`);
+        activeCommentActionBlockParent = commentActionContainer;
 
-        let block = ReplyCommentBlock(id);
+        let block = ActionCommentBlock(id, action);
 
-        activeReplyBlock.append(block)
+        activeCommentActionBlockParent.append(block)
+    }
+
+    function UpdatePostComments()
+    {
+        $.ajax({
+            url: getPostDetailUrl,
+            type: "GET",
+            dataType: "json",
+            success: (postData) => {
+                DisplayPostComments(postData);
+            },
+            error: (error) => {
+                console.log(error);
+            }
+
+        });
     }
 
     function SendReplyComment(id)
     {
-        const commentTextarea = document.getElementById(`comment-${id}-reply-textarea`);
+        const commentTextarea = document.getElementById(`comment-${id}-action-textarea`);
         let replyText = commentTextarea.value
-        //console.log(id)
-        //console.log(replyText)
-
-        urlquery = "{% url 'api:comment-list'%}"//.slice(0, -9)
-
-            let csrftoken = getCookie('csrftoken');
 
             $.ajax({
-                url: urlquery,
+                url: commentUrl,
                 type: "POST",
                 data: {
-                    'post': 2,
+                    'post': detailPostId,
                     'text': replyText,
-                    'parent': 2,
+                    'parent': id,
                 },
                 headers: {
                     'X-CSRFToken': csrftoken
                 },
                 success: (data) => {
-                    console.log(data);
+                    //console.log(data);
+                    UpdatePostComments();
                 },
                 error: (error) => {
                     console.log(error);
@@ -220,25 +230,21 @@
     {
         const commentTextarea = document.getElementById(`post-comment-textarea`);
         let commentText = commentTextarea.value
-        //console.log(id)
-        //console.log(commentText)
-
-        urlquery = "{% url 'api:comment-list'%}"//.slice(0, -9)
-
-            let csrftoken = getCookie('csrftoken');
+        commentTextarea.value = ""
 
             $.ajax({
-                url: urlquery,
+                url: commentUrl,
                 type: "POST",
                 data: {
-                    'post': 2,
+                    'post': detailPostId,
                     'text': commentText,
                 },
                 headers: {
                     'X-CSRFToken': csrftoken
                 },
                 success: (data) => {
-                    console.log(data);
+                    //console.log(data);
+                    UpdatePostComments();
                 },
                 error: (error) => {
                     console.log(error);

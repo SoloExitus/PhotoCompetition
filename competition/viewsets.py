@@ -1,12 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics
 
 from competition.models import PhotoPost, Comment, PhotoPostState
-from competition.permissions import AuthorAllStaffChange, IsAuthorComment
+from competition.permissions import AuthorAllStaffChange, IsAuthorCommentChange
 from competition.serializers import PhotoPostListSerializer, PhotoPostDetailSerializer, CommentsSerializer
 from competition.mixins import LikePostMixin
+from competition.services import destroy_comment, update_comment
 
 
 class GalleryViewSet(LikePostMixin, viewsets.ReadOnlyModelViewSet):
@@ -42,22 +44,21 @@ class UserPostViewSet(viewsets.ModelViewSet):
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
-    #permission_classes = [IsAuthorComment]
+    permission_classes = [IsAuthorCommentChange]
     serializer_class = CommentsSerializer
 
     def create(self, request, *args, **kwargs):
-        #import pdb
-
-        #pdb.set_trace()
-        print(request.data)
-        #request.data['user'] = request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    # def perform_create(self, serializer):
-    #
-    #     serializer.save(user=self.request.user)
+    def destroy(self, request, *args, **kwargs):
+        destroy_comment(request)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    def partial_update(self, request, *args, **kwargs):
+        update_comment(request)
+        return Response(status=status.HTTP_202_ACCEPTED)
 

@@ -15,12 +15,17 @@ class UserSerializer(ModelSerializer):
 class PhotoPostListSerializer(ModelSerializer):
     is_liked = serializers.SerializerMethodField()
     author = UserSerializer(source='user', read_only=True)
+    preview_image = serializers.ImageField(read_only=True)
 
     class Meta:
         model = PhotoPost
-        fields = ['id', 'title', 'description', 'is_liked', 'published_at', 'updated_at', 'full_image','preview_image', 'state',
-                  'total_likes', 'total_comments', 'author']
+        fields = ['id', 'title', 'description', 'is_liked', 'published_at', 'updated_at', 'full_image', 'preview_image',
+                  'state', 'total_likes', 'total_comments', 'author']
         read_only_fields = ['published_at', 'updated_at', 'state', 'likes_count', 'comments_count', 'author']
+
+
+    # def get_preview_image(self, post):
+    #     return post.preview_image.replace('\\', '/')
 
     def get_is_liked(self, post) -> bool:
         """Проверяет, лайкнул ли `request.user` post.

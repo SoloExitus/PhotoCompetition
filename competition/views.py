@@ -25,6 +25,7 @@ class PostDetailView(TemplateView):
 
 class ProfileView(TemplateView):
     template_name = "competition/profile.html"
+    permission_classes = [IsAuthenticated]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
