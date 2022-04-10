@@ -22,42 +22,39 @@ def is_liked_post(post, user) -> bool:
     return likes.exists()
 
 
-def destroy_comment(request):
+def destroy_comment(request, pk):
     user = request.user
-    comment = Comment.objects.get(id=request.data['id'], user=user)
+    comment = Comment.objects.get(id=pk)
 
     if not comment:
         return False
 
-    if user.id == comment.user.id or not user.is_authenticated:
+    if not user.id == comment.user.id:
         return False
 
-    if comment.comment_children:
+    if comment.comment_children.exists():
         return False
 
     comment.delete()
     return True
 
 
-def update_comment(request):
+def update_comment(request, pk):
     user = request.user
-    comment = Comment.objects.get(id=request.data['id'], user=user)
+    comment = Comment.objects.get(id=pk)
 
     if not comment:
         return False
 
-    if user.id == comment.user.id or not user.is_authenticated:
+    if not user.id == comment.user.id:
         return False
 
-    if comment.comment_children:
+    if comment.comment_children.exists():
         return False
 
     text = request.data["text"]
+
     comment.text = text
+    comment.save()
     return True
-
-
-
-def comment_post(post, user, text):
-    Comment.objects.create(post=post, user=user, text=text)
 

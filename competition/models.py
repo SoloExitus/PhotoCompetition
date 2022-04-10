@@ -126,7 +126,7 @@ class Comment(models.Model):
         ordering = ('created_at',)
 
     def __str__(self):
-        return f'Comment by {self.user}'
+        return f'{self.user}: {self.text}'
 
 
 class Like(models.Model):

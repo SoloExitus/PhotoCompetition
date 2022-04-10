@@ -43,7 +43,8 @@ class UserPostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class CommentsViewSet(viewsets.ModelViewSet):
+class CommentsViewSet(viewsets.mixins.CreateModelMixin, viewsets.mixins.UpdateModelMixin,
+                      viewsets.mixins.DestroyModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthorCommentChange]
     serializer_class = CommentsSerializer
 
@@ -55,10 +56,14 @@ class CommentsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def destroy(self, request, *args, **kwargs):
-        destroy_comment(request)
-        return Response(status=status.HTTP_202_ACCEPTED)
+        do = destroy_comment(request, kwargs['pk'])
+        if do:
+            return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
-    def partial_update(self, request, *args, **kwargs):
-        update_comment(request)
-        return Response(status=status.HTTP_202_ACCEPTED)
+    def update(self, request, *args, **kwargs):
+        do = update_comment(request, kwargs['pk'])
+        if do:
+            return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_403_FORBIDDEN)
 

@@ -51,4 +51,4 @@ class IsAuthorCommentChange(permissions.BasePermission):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user and not obj.comment_children.exists()
+        return obj.user == request.user and (not obj.comment_children.exists())

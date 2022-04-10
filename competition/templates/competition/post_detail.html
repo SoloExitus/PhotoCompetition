@@ -1,5 +1,5 @@
 {% extends 'competition/gallery.html' %}
-
+{% load static %}
 
 {% block main %}
 <!-- Page Content -->
@@ -21,9 +21,18 @@
 <script>
     let activeCommentActionBlockParent = null;
     let detailPostId = {{ post_id }};
-    let commentUrl = "{% url 'api:comment-list'%}";
+    let commentListUrl = "{% url 'api:comment-list'%}";
+    let commentDestroyUrl = "{% url 'api:comment-detail' 0 %}".slice(0,-2);
+    let commentEditUrl = "{% url 'api:comment-detail' 0 %}".slice(0,-2);
+
     let csrftoken = getCookie('csrftoken');
     let getPostDetailUrl ="{% url 'api:gallery-detail' post_id  %}";
+
+    let requestUserId = null
+
+    {% if request.user.is_authenticated %}
+    requestUserId = {{ request.user.id }}
+    {% endif %}
 
 
     function renderComment(comment)
@@ -56,9 +65,15 @@
                             </div>
                             {% if request.user.is_authenticated %}
 
-                            <div class="col-md-4 d-flex justify-content-end">
+                            <div class="col-md-4 d-flex justify-content-end button-container">
                                 <div class="mt-2 text-right">
-                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Reply')">reply</button>
+                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Reply')">Reply</button>
+                                </div>
+                                <div class="mt-2 text-right">
+                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Edit')">Edit</button>
+                                </div>
+                                <div class="mt-2 text-right">
+                                    <button class="btn btn-sm btn-danger" onclick = 'removeComment(${comment.id})'>Remove</button>
                                 </div>
                             </div>
 
@@ -163,7 +178,7 @@
                         <textarea id="comment-${id}-action-textarea" class="form-control ml-1 shadow-none textarea "></textarea>
                     </div>
                     <div class="mt-2 text-right">
-                        <button class="btn btn-primary btn-sm shadow-none" type="button" onClick='SendReplyComment(${id})'>
+                        <button class="btn btn-primary btn-sm shadow-none" type="button" onClick='${action}Comment(${id})'>
                             ${action}
                         </button>
                     </div>`
@@ -200,13 +215,13 @@
         });
     }
 
-    function SendReplyComment(id)
+    function ReplyComment(id)
     {
         const commentTextarea = document.getElementById(`comment-${id}-action-textarea`);
         let replyText = commentTextarea.value
 
             $.ajax({
-                url: commentUrl,
+                url: commentListUrl,
                 type: "POST",
                 data: {
                     'post': detailPostId,
@@ -233,7 +248,7 @@
         commentTextarea.value = ""
 
             $.ajax({
-                url: commentUrl,
+                url: commentListUrl,
                 type: "POST",
                 data: {
                     'post': detailPostId,
@@ -251,6 +266,47 @@
                 }
             });
     }
+
+    function EditComment(commentId)
+    {
+        const commentTextarea = document.getElementById(`comment-${commentId}-action-textarea`);
+        let newText = commentTextarea.value
+
+            $.ajax({
+                url: commentEditUrl + commentId + "/",
+                data: {
+                    'text': newText,
+                },
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                type: 'PATCH',
+                success: (data) => {
+                    UpdatePostComments();
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
+        }
+
+    function removeComment(commentId)
+    {
+
+            $.ajax({
+                url: commentDestroyUrl + commentId + "/",
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                type: 'DELETE',
+                success: (data) => {
+                    UpdatePostComments();
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
+        }
 
 </script>
 {% endblock customjs %}
