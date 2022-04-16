@@ -1,0 +1,312 @@
+{% extends 'competition/gallery.html' %}
+{% load static %}
+
+{% block main %}
+<!-- Page Content -->
+
+
+    <div class="row text-center text-lg-start post-container">
+
+    </div>
+
+    <div class="container card my-4 py-5 post-comments">
+      <div class="row d-flex justify-content-center comments-container">
+      </div>
+
+    </div>
+
+{% endblock main %}
+
+{% block customjs %}
+<script>
+    let activeCommentActionBlockParent = null;
+    let detailPostId = {{ post_id }};
+    let commentListUrl = "{% url 'api:comment-list'%}";
+    let commentDestroyUrl = "{% url 'api:comment-detail' 0 %}".slice(0,-2);
+    let commentEditUrl = "{% url 'api:comment-detail' 0 %}".slice(0,-2);
+
+    let csrftoken = getCookie('csrftoken');
+    let getPostDetailUrl ="{% url 'api:gallery-detail' post_id  %}";
+
+    let requestUserId = null
+
+    {% if request.user.is_authenticated %}
+    requestUserId = {{ request.user.id }}
+    {% endif %}
+
+
+    function renderComment(comment)
+    {
+                let render = document.createElement('div');
+                render.classList.add('d-flex', 'flex-start', `comment-${ comment.id }`)
+                render.innerHTML = `
+                <img
+                    class="rounded-circle shadow-1-strong me-3"
+                    src="${ comment.author.profile_image || comment.author.thumbnail }"
+                    alt="avatar"
+                    width="65"
+                    height="65"
+                />`
+
+                let content = document.createElement('div');
+                content.classList.add('flex-grow-1', 'flex-shrink-1');
+
+                content.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <p class="mb-1">
+                                <i>${ comment.author.username }</i>
+                                <span class="small">- ${ comment.created_at }</span>
+                            </p>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-4">
+                                ${ comment.text }
+                            </div>
+                            {% if request.user.is_authenticated %}
+
+                            <div class="col-md-4 d-flex justify-content-end button-container">
+                                <div class="mt-2 text-right">
+                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Reply')">Reply</button>
+                                </div>
+                                <div class="mt-2 text-right">
+                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Edit')">Edit</button>
+                                </div>
+                                <div class="mt-2 text-right">
+                                    <button class="btn btn-sm btn-danger" onclick = 'removeComment(${comment.id})'>Remove</button>
+                                </div>
+                            </div>
+
+                            <div class="comment-${comment.id}-action-container">
+
+                            </div>
+
+                            {% endif %}
+                        </div>`
+
+                if (comment.comment_children){
+                    let children = document.createElement('div');
+                    children.classList.add(`children-comments-${ comment.id }`);
+                    comment.comment_children.forEach(chcom => {
+                        children.append(renderComment(chcom));
+                    })
+                    content.append(children);
+                }
+
+
+                render.append(content);
+                return render;
+    }
+
+    function DisplayPostComments(postData)
+    {
+        const commentsContainer= $(".comments-container");
+        commentsContainer.empty();
+
+        postData.comments.forEach(comment=>{
+            commentsContainer.append(renderComment(comment));
+        })
+    }
+
+    $(document).ready(function() {
+    $.ajax({
+      url: getPostDetailUrl,
+      type: "GET",
+      dataType: "json",
+       success: (postData) => {
+
+          const postContainer = $(".post-container");
+          postContainer.empty()
+
+
+            const post = `
+            <div class="block">
+                <h4>${postData.title}</h4>
+                <img class="img-fluid img-thumbnail" src="${postData.full_image}" alt="${postData.title}">
+                <div>
+                    <p>
+                        likes: ${postData.total_likes}
+                        comments: ${postData.total_comments}
+                    </p>
+                </div>
+                <div>
+                    <b>Description:</b><br>
+                    <span>
+                        ${postData.description}
+                    </span>
+                </div>
+            </div>`
+
+            postContainer.append(post);
+
+            DisplayPostComments(postData);
+
+            PostCommentBlock(postData.id);
+
+        },
+          error: (error) => {
+            console.log(error);
+          }
+    });
+    });
+
+    function PostCommentBlock(id)
+    {
+        let block = document.createElement('div');
+        block.classList.add('bg-light', 'p-2');
+        block.innerHTML = `
+        <div class="d-flex flex-row align-items-start">
+                <textarea id="post-comment-textarea" class="form-control ml-1 shadow-none textarea"></textarea>
+            </div>
+            <div class="mt-2 text-right">
+                <button class="btn btn-primary btn-sm shadow-none" type="button" onClick='SendPostComment(${id})'>
+                    Comment
+                </button>
+            </div>`
+
+        let container = $(".post-comments");
+        container.append(block)
+
+    }
+
+    function ActionCommentBlock(id, action)
+    {
+        let block = document.createElement('div');
+                block.classList.add('bg-light', 'p-2');
+                block.innerHTML = `
+                <div class="d-flex flex-row align-items-start">
+                        <textarea id="comment-${id}-action-textarea" class="form-control ml-1 shadow-none textarea "></textarea>
+                    </div>
+                    <div class="mt-2 text-right">
+                        <button class="btn btn-primary btn-sm shadow-none" type="button" onClick='${action}Comment(${id})'>
+                            ${action}
+                        </button>
+                    </div>`
+
+        return block
+    }
+
+    function DisplayCommentActionBlock(id, action)
+    {
+        if (activeCommentActionBlockParent)
+            activeCommentActionBlockParent.empty()
+
+        commentActionContainer = $(`.comment-${id}-action-container`);
+        activeCommentActionBlockParent = commentActionContainer;
+
+        let block = ActionCommentBlock(id, action);
+
+        activeCommentActionBlockParent.append(block)
+    }
+
+    function UpdatePostComments()
+    {
+        $.ajax({
+            url: getPostDetailUrl,
+            type: "GET",
+            dataType: "json",
+            success: (postData) => {
+                DisplayPostComments(postData);
+            },
+            error: (error) => {
+                console.log(error);
+            }
+
+        });
+    }
+
+    function ReplyComment(id)
+    {
+        const commentTextarea = document.getElementById(`comment-${id}-action-textarea`);
+        let replyText = commentTextarea.value
+
+            $.ajax({
+                url: commentListUrl,
+                type: "POST",
+                data: {
+                    'post': detailPostId,
+                    'text': replyText,
+                    'parent': id,
+                },
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: (data) => {
+                    //console.log(data);
+                    UpdatePostComments();
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
+    }
+
+    function SendPostComment(id)
+    {
+        const commentTextarea = document.getElementById(`post-comment-textarea`);
+        let commentText = commentTextarea.value
+        commentTextarea.value = ""
+
+            $.ajax({
+                url: commentListUrl,
+                type: "POST",
+                data: {
+                    'post': detailPostId,
+                    'text': commentText,
+                },
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: (data) => {
+                    //console.log(data);
+                    UpdatePostComments();
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
+    }
+
+    function EditComment(commentId)
+    {
+        const commentTextarea = document.getElementById(`comment-${commentId}-action-textarea`);
+        let newText = commentTextarea.value
+
+            $.ajax({
+                url: commentEditUrl + commentId + "/",
+                data: {
+                    'text': newText,
+                },
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                type: 'PATCH',
+                success: (data) => {
+                    UpdatePostComments();
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
+        }
+
+    function removeComment(commentId)
+    {
+
+            $.ajax({
+                url: commentDestroyUrl + commentId + "/",
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                type: 'DELETE',
+                success: (data) => {
+                    UpdatePostComments();
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
+        }
+
+</script>
+{% endblock customjs %}

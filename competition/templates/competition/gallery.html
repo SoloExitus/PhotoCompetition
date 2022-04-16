@@ -1,0 +1,168 @@
+{% extends 'competition/base.html' %}
+
+{% load static %}
+{% block header %}
+
+    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+      <li><a href="{% url 'main' %}" class="nav-link px-2 link-dark">Competition</a></li>
+    </ul>
+
+    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+      <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
+    </form>
+
+    <div class="dropdown text-end">
+        {% if request.user.is_authenticated %}
+        <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ request.user.username }}
+            <img src="{{ request.user.profile_image }}" alt="thumbnail" width="32" height="32" class="rounded-circle">
+        </a>
+      <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
+        <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+          <li><a class="dropdown-item" href="{% url 'add' %}">Create Post</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <a class="dropdown-item" href="{% url 'logout' %}">Sign out</a>
+        </li>
+      </ul>
+        {% else %}
+        <p>
+            <a href="{% url 'social:begin' 'github' %}">Login with Github</a>
+        </p>
+        {% endif %}
+    </div>
+{% endblock header %}
+
+
+{% block main %}
+<!-- Page Content -->
+    <div class="col-md-10">
+        <div class="row justify-content-around gallery">
+        </div>
+    </div>
+
+{% endblock main %}
+
+{% block customjs %}
+    <script>
+        let urlInactiveLikeImage = "{% static '/img/like.png' %}";
+        let urlActiveLikeImage = "{% static '/img/like_active.png' %}";
+
+        $(document).ready(function() {
+            $.ajax({
+              url: "{% url 'api:gallery-list' %}",
+              type: "GET",
+              dataType: "json",
+                success: (data) => {
+                  const gallery = $(".gallery");
+                  gallery.empty();
+                  const urlpost= "{% url 'post' 0 %}".slice(0, -1);
+
+                  data.forEach(postData => {
+                    let LikeUrl = urlInactiveLikeImage;
+
+                    if (postData.is_liked)
+                        LikeUrl = urlActiveLikeImage;
+
+                    const post = `
+                        <div class=" col-md-4 col-6 card" >
+                            <div class="card-header">
+                                <h5> ${postData.title} </h5>
+
+                                <a href="${urlpost + postData.id}" class="d-block mb-4 h-100 post_img_container">
+                                    <img class="img-fluid img-thumbnail" src="${postData.preview_image}"  width="100%" alt="${postData.title}">
+                                    <p class="post_description">
+                                        ${postData.description}
+                                    </p>
+                                </a>
+                            </div>
+                            <div id="post-${postData.id}-info" class="card-body container">
+                            </div>
+
+                        </div>`
+
+                    gallery.append(post);
+                    SetPhotoPostInfo(postData.id, postData);
+                  });
+                  },
+                  error: (error) => {
+                    console.log(error);
+                  }
+            });
+        });
+
+        function SetPhotoPostInfo(post_id, data) {
+            const postInfo = $(`#post-${post_id}-info`);
+
+            let LikeUrl = urlInactiveLikeImage;
+            let Func = 'likepost'
+
+            if (data.is_liked)
+            {
+              LikeUrl = urlActiveLikeImage;
+              Func = 'unlikepost'
+            }
+
+            postInfo.empty();
+
+                const entry = `
+                    <div class="d-flex flex-row justify-content-between">
+                        <button class="btn" onclick = '${Func}(${post_id})'>
+                            <div class="block">
+                                <img src=${LikeUrl} width="20px">
+                                <span> ${data.total_likes} </span>
+                            </div>
+                        </button>
+                        <div class="block">
+                            <img src="{% static '/img/chat.png' %}" width="20px"> <span>${data.total_comments}</span>
+                        </div>
+                    </div>`
+
+                postInfo.append(entry);
+        }
+
+        function likepost(post_id)
+        {
+            urlquery = "{% url 'api:gallery-like' 0 %}".slice(0, -6)
+
+            let csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                url: urlquery + post_id + '/like/',
+                type: "POST",
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: (data) => {
+                    SetPhotoPostInfo(post_id, data);
+                    //console.log(data);
+                    },
+                    error: (error) => {
+                        console.log(error);
+                    }
+            });
+        }
+
+        function unlikepost(post_id)
+        {
+            urlquery = "{% url 'api:gallery-unlike' 0 %}".slice(0, -9)
+
+            let csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                url: urlquery + post_id + '/unlike/',
+                type: "POST",
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: (data) => {
+                    SetPhotoPostInfo(post_id, data);
+                    //console.log(data);
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+{% endblock customjs %}
