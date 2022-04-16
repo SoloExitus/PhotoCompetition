@@ -19,19 +19,20 @@ class PhotoPostListSerializer(ModelSerializer):
 
     class Meta:
         model = PhotoPost
-        fields = ['id', 'title', 'description', 'is_liked', 'published_at', 'updated_at', 'full_image', 'preview_image',
+        fields = ['id', 'title', 'description', 'is_liked', 'updated_at', 'full_image', 'preview_image',
                   'state', 'total_likes', 'total_comments', 'author']
-        read_only_fields = ['published_at', 'updated_at', 'state', 'likes_count', 'comments_count', 'author']
+        read_only_fields = ['updated_at', 'state', 'likes_count', 'comments_count', 'author']
 
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+    #     representation['published_at'] = instance.published_at.strftime('%H:%M:%S %d-%m-%Y')
+    #     return representation
 
-    # def get_preview_image(self, post):
-    #     return post.preview_image.replace('\\', '/')
-
-    def get_is_liked(self, post) -> bool:
+    def get_is_liked(self, obj) -> bool:
         """Проверяет, лайкнул ли `request.user` post.
         """
         user = self.context.get('request').user
-        return is_liked_post(post, user)
+        return is_liked_post(obj, user)
 
 
 class PhotoPostInfoSerializer(ModelSerializer):
@@ -103,6 +104,9 @@ class PhotoPostDetailSerializer(PhotoPostListSerializer):
             'author',
             'comments',
         )
+
+    # def get_published_at(self, obj):
+    #     return obj.published_at.strftime('%H:%M:%S %d-%m-%Y')
 
 
 class CommentsSerializer(ModelSerializer):
