@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from service_objects.services import Service
-from .models import Like, Comment
+from .models import PhotoPost, Like, Comment
 
 
 def like_post(post, user):
@@ -12,6 +12,30 @@ def like_post(post, user):
 
 def unlike_post(post, user):
     Like.objects.get(post=post, user=user).delete()
+
+
+def editpost(request, pk):
+    user = request.user
+    post = PhotoPost.objects.get(id=pk)
+
+    if not post:
+        return False
+
+    if not user.id == post.user.id:
+        return False
+
+    print(request.data)
+    title = request.data["text"]
+    description = request.data["description"]
+    full_image = request.data["full_image"]
+
+    post.title = title
+    post.description = description
+
+    post.full_image = full_image
+
+    post.save()
+    return True
 
 
 def is_liked_post(post, user) -> bool:

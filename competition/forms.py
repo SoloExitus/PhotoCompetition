@@ -9,8 +9,8 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['text']
 
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = PhotoPost
         fields = ['title', 'description', 'full_image']
-        #success_url = reverse_lazy('profile-list')

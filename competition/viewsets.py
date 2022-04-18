@@ -8,7 +8,8 @@ from competition.models import PhotoPost, Comment, PhotoPostState
 from competition.permissions import AuthorAllStaffChange, IsAuthorCommentChange
 from competition.serializers import PhotoPostListSerializer, PhotoPostDetailSerializer, CommentsSerializer
 from competition.mixins import LikePostMixin
-from competition.services import destroy_comment, update_comment
+from competition.services import editpost, destroy_comment, update_comment
+from competition.forms import PostForm
 
 
 class GalleryViewSet(LikePostMixin, viewsets.ReadOnlyModelViewSet):
@@ -41,6 +42,42 @@ class UserPostViewSet(viewsets.ModelViewSet):
         serializer.save(user=request.user)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        pk = kwargs['pk']
+        post = PhotoPost.objects.get(pk=pk)
+
+        old_image = post.full_image
+
+        form = PostForm(data=request.data, instance=post)
+        if form.is_valid():
+            new_post = form.save(commit=False)
+            new_image = new_post.full_image
+            if old_image != new_image:
+                new_post.previous_image = old_image
+                new_post.state = PhotoPostState.NEW
+
+            post.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+
+
+
+
+        # do = editpost(request, kwargs['pk'])
+        # if do:
+        #     return Response(status=status.HTTP_202_ACCEPTED)
+        # return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class CommentsViewSet(viewsets.mixins.CreateModelMixin, viewsets.mixins.UpdateModelMixin,

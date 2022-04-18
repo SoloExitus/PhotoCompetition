@@ -42,3 +42,14 @@ class PhotoPostCreateView(TemplateView):
         context['pageTitle'] = 'Create Post'
         context['form'] = PostForm()
         return context
+
+
+class PhotoPostEditView(TemplateView):
+    template_name = "competition/photopostedit.html"
+    permission_classes = [IsAuthenticated]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pageTitle'] = 'Edit Post'
+        context['form'] = PostForm()
+        return context
