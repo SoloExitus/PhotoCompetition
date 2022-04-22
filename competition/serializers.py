@@ -19,7 +19,7 @@ class PhotoPostListSerializer(ModelSerializer):
 
     class Meta:
         model = PhotoPost
-        fields = ['id', 'title', 'description', 'is_liked', 'updated_at', 'full_image', 'preview_image',
+        fields = ['id', 'title', 'description', 'is_liked', 'updated_at', 'created_at', 'full_image', 'preview_image',
                   'state', 'total_likes', 'total_comments', 'author']
         read_only_fields = ['updated_at', 'state', 'likes_count', 'comments_count', 'author']
 
@@ -29,6 +29,7 @@ class PhotoPostListSerializer(ModelSerializer):
     #     return representation
 
     def get_is_liked(self, obj) -> bool:
+
         """Проверяет, лайкнул ли `request.user` post.
         """
         user = self.context.get('request').user
@@ -74,12 +75,19 @@ class NestedCommentSerializer(ModelSerializer):
 class PostCommentSerializer(ModelSerializer):
     author = UserSerializer(source='user')
     comment_children = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
 
     def get_comment_children(self, comment):
         if comment.comment_children.exists():
             return NestedCommentSerializer(comment.comment_children, many=True).data
         else:
             return None
+
+    def get_created_at(self, comment):
+        # import pdb
+        # pdb.set_trace()
+
+        return comment.created_at.strftime("%d-%m-%Y")
 
     class Meta:
         model = Comment
@@ -101,6 +109,7 @@ class PhotoPostDetailSerializer(PhotoPostListSerializer):
             'published_at',
             'total_likes',
             'total_comments',
+            'created_at',
             'author',
             'comments',
         )
