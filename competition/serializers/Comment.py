@@ -35,10 +35,7 @@ class PostCommentSerializer(serializers.ModelSerializer):
     created_at = serializers.SerializerMethodField()
 
     def get_comment_children(self, comment):
-        if comment.comment_children.exists():
-            return NestedCommentSerializer(comment.comment_children, many=True).data
-        else:
-            return None
+        return NestedCommentSerializer(comment.comment_children, many=True).data
 
     def get_created_at(self, comment):
         return comment.created_at.strftime("%d-%m-%Y")
@@ -51,6 +48,10 @@ class PostCommentSerializer(serializers.ModelSerializer):
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = UserSerializer(source='user', read_only=True)
+    created_at = serializers.SerializerMethodField()
+
+    def get_created_at(self, comment):
+        return comment.created_at.strftime("%d-%m-%Y")
 
     class Meta:
         model = Comment

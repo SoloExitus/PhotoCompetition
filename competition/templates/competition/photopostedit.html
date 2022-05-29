@@ -4,6 +4,8 @@
 
 {% block customjs %}
 <script>
+    let requestURL = "{% url 'api:profile-detail' 0 %}".slice(0, -2)
+
 $(document).ready(function() {
 
   $('#form').submit(function (event) {
@@ -11,8 +13,8 @@ $(document).ready(function() {
     form = $(this)
     formData = new FormData(this);
     $.ajax({
-      url: "{% url 'api:profile-list' %}",
-      method: "POST",
+      url: requestURL + {{ pk }} + "/",
+      method: 'PATCH',
       data: formData,
       success: function (response) {
           console.log(response);

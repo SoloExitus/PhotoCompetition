@@ -32,9 +32,6 @@ class UserPostViewSet(viewsets.ModelViewSet):
         return PhotoPost.objects.filter(user=user)
 
     def create(self, request, *args, **kwargs):
-        #import pdb
-
-        #pdb.set_trace()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
@@ -42,6 +39,9 @@ class UserPostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
+        import pdb
+
+        pdb.set_trace()
         pk = kwargs['pk']
         post = PhotoPost.objects.get(pk=pk)
 
@@ -66,10 +66,6 @@ class UserPostViewSet(viewsets.ModelViewSet):
         serializer.save(user=request.user)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-
-
 
 
         # do = editpost(request, kwargs['pk'])

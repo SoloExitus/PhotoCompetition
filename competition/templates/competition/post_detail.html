@@ -51,12 +51,17 @@
                 let content = document.createElement('div');
                 content.classList.add('flex-grow-1', 'flex-shrink-1');
 
-                let change_actions = "";
-                if ( requestUserId ===  comment.author.id )
-                    change_actions =`
+                let action_edit = "";
+                if ( requestUserId  === comment.author.id )
+                    action_edit = `
                     <div class="mt-2 text-right">
                         <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Edit')">Edit</button>
                     </div>
+                    `
+
+                let remove_actions = "";
+                if ( requestUserId === comment.author.id && comment.comment_children.length === 0)
+                    remove_actions =`
                     <div class="mt-2 text-right">
                         <button class="btn btn-sm btn-danger" onclick = 'removeComment(${comment.id})'>Remove</button>
                     </div>
@@ -79,7 +84,8 @@
                                     <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Reply')">Reply</button>
                                 </div>
 
-                                ${ change_actions }
+                                ${ action_edit }
+                                ${ remove_actions }
 
                             </div>
 

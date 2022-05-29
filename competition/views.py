@@ -53,13 +53,8 @@ class PhotoPostEditView(TemplateView):
     permission_classes = [ IsAuthenticated ]
 
     def get_context_data(self, **kwargs):
-        import pdb
-        #pdb.set_trace()
-
         pk = kwargs['pk']
-
         post = PhotoPost.objects.get(id=pk)
-
         context = super().get_context_data(**kwargs)
         context['pageTitle'] = 'Edit Post'
         context['form'] = PostForm(instance=post)
