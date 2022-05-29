@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from competition import services
 from competition.permissions import AuthUserButNotAuthorOrStuffOrSuper
-from competition.serializers import PhotoPostInfoSerializer, PostCommentSerializer
+from competition.serializers.PhotoPost import PhotoPostInfoSerializer, PostCommentSerializer
 
 
 class LikePostMixin:
@@ -12,7 +12,6 @@ class LikePostMixin:
     def like(self, request, pk=None):
         post = self.get_object()
         services.like_post(post, request.user)
-        # post.refresh_from_db()
         serializer = PhotoPostInfoSerializer(post, context={'request': request})
         return Response(serializer.data)
 
@@ -20,6 +19,5 @@ class LikePostMixin:
     def unlike(self, request, pk=None):
         post = self.get_object()
         services.unlike_post(post, request.user)
-        # post.refresh_from_db()
         serializer = PhotoPostInfoSerializer(post, context={'request': request})
         return Response(serializer.data)

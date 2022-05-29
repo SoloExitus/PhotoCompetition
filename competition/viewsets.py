@@ -1,12 +1,10 @@
 from rest_framework import viewsets, status
-from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import generics
 
 from competition.models import PhotoPost, Comment, PhotoPostState
 from competition.permissions import AuthorAllStaffChange, IsAuthorCommentChange
-from competition.serializers import PhotoPostListSerializer, PhotoPostDetailSerializer, CommentsSerializer
+from competition.serializers.PhotoPost import PhotoPostListSerializer, PhotoPostDetailSerializer
+from competition.serializers.Comment import CommentsSerializer
 from competition.mixins import LikePostMixin
 from competition.services import editpost, destroy_comment, update_comment
 from competition.forms import PostForm

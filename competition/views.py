@@ -35,7 +35,7 @@ class ProfileView(TemplateView):
 
 class PhotoPostCreateView(TemplateView):
     template_name = "competition/photopostcreate.html"
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ IsAuthenticated, ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -46,7 +46,7 @@ class PhotoPostCreateView(TemplateView):
 
 class PhotoPostEditView(TemplateView):
     template_name = "competition/photopostedit.html"
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ IsAuthenticated ]
 
     def get_context_data(self, **kwargs):
         pk = kwargs['pk']
