@@ -20,13 +20,13 @@
 {% block customjs %}
 <script>
     let activeCommentActionBlockParent = null;
-    let detailPostId = {{ post_id }};
+    let detailPostId = {{ pk }};
     let commentListUrl = "{% url 'api:comment-list'%}";
     let commentDestroyUrl = "{% url 'api:comment-detail' 0 %}".slice(0,-2);
     let commentEditUrl = "{% url 'api:comment-detail' 0 %}".slice(0,-2);
 
     let csrftoken = getCookie('csrftoken');
-    let getPostDetailUrl ="{% url 'api:gallery-detail' post_id  %}";
+    let getPostDetailUrl ="{% url 'api:gallery-detail' pk  %}";
 
     let requestUserId = null
 
@@ -51,6 +51,17 @@
                 let content = document.createElement('div');
                 content.classList.add('flex-grow-1', 'flex-shrink-1');
 
+                let change_actions = "";
+                if ( requestUserId ===  comment.author.id )
+                    change_actions =`
+                    <div class="mt-2 text-right">
+                        <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Edit')">Edit</button>
+                    </div>
+                    <div class="mt-2 text-right">
+                        <button class="btn btn-sm btn-danger" onclick = 'removeComment(${comment.id})'>Remove</button>
+                    </div>
+                    `
+
                 content.innerHTML = `
                         <div class="d-flex justify-content-between align-items-center">
                             <p class="mb-1">
@@ -59,36 +70,31 @@
                             </p>
                         </div>
                         <div class="row">
-
                             <div class="col-md-4">
                                 ${ comment.text }
                             </div>
                             {% if request.user.is_authenticated %}
-
                             <div class="col-md-4 d-flex justify-content-end button-container">
                                 <div class="mt-2 text-right">
                                     <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Reply')">Reply</button>
                                 </div>
-                                <div class="mt-2 text-right">
-                                    <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Edit')">Edit</button>
-                                </div>
-                                <div class="mt-2 text-right">
-                                    <button class="btn btn-sm btn-danger" onclick = 'removeComment(${comment.id})'>Remove</button>
-                                </div>
+
+                                ${ change_actions }
+
                             </div>
 
                             <div class="comment-${comment.id}-action-container">
-
                             </div>
-
                             {% endif %}
                         </div>`
+
+
 
                 if (comment.comment_children){
                     let children = document.createElement('div');
                     children.classList.add(`children-comments-${ comment.id }`);
-                    comment.comment_children.forEach(chcom => {
-                        children.append(renderComment(chcom));
+                    comment.comment_children.forEach(child_comment => {
+                        children.append(renderComment(child_comment));
                     })
                     content.append(children);
                 }

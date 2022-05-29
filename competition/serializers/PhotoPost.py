@@ -17,11 +17,11 @@ class PhotoPostListSerializer(serializers.ModelSerializer):
                   'state', 'total_likes', 'total_comments', 'author']
         read_only_fields = ['updated_at', 'state', 'likes_count', 'comments_count', 'author']
 
-    def get_is_liked(self, obj) -> bool:
+    def get_is_liked(self, instance) -> bool:
         """Проверяет, лайкнул ли `request.user` post.
         """
         user = self.context.get('request').user
-        return is_liked_post(obj, user)
+        return is_liked_post(instance, user)
 
 
 class PhotoPostInfoSerializer(serializers.ModelSerializer):
@@ -31,11 +31,11 @@ class PhotoPostInfoSerializer(serializers.ModelSerializer):
         model = PhotoPost
         fields = ['is_liked', 'total_likes', 'total_comments']
 
-    def get_is_liked(self, post) -> bool:
+    def get_is_liked(self, instance) -> bool:
         """Проверяет, лайкнул ли `request.user` post.
         """
         user = self.context.get('request').user
-        return is_liked_post(post, user)
+        return is_liked_post(instance, user)
 
 
 class PhotoPostDetailSerializer(PhotoPostListSerializer):

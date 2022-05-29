@@ -4,6 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 
 from competition.forms import PostForm
 
+from competition.models import PhotoPost
+
+from competition.serializers.PhotoPost import PhotoPostDetailSerializer
+
 
 class HomePageView(TemplateView):
     template_name = "competition/gallery.html"
@@ -49,8 +53,14 @@ class PhotoPostEditView(TemplateView):
     permission_classes = [ IsAuthenticated ]
 
     def get_context_data(self, **kwargs):
+        import pdb
+        #pdb.set_trace()
+
         pk = kwargs['pk']
+
+        post = PhotoPost.objects.get(id=pk)
+
         context = super().get_context_data(**kwargs)
         context['pageTitle'] = 'Edit Post'
-        context['form'] = PostForm(pk=pk)
+        context['form'] = PostForm(instance=post)
         return context

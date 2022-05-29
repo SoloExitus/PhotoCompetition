@@ -18,7 +18,7 @@
               gallery.empty()
 
                const urlpost= "{% url 'post' 0 %}".slice(0, -1);
-               const urlupdate= "{% url 'update' 0 %}".slice(0, -1);
+               const urledit= "{% url 'edit' 0 %}".slice(0, -1);
 
               data.forEach(postData => {
 
@@ -27,7 +27,7 @@
                     <div class="card-header">
                         <h4> ${postData.title} </h4>
 
-                        <a href="${urlupdate + postData.id}" class="d-block mb-4 h-100 post_img_container">
+                        <a href="${urledit + postData.id}" class="d-block mb-4 h-100 post_img_container">
                             <img class="img-fluid img-thumbnail" src="${postData.preview_image}"  width="100%" alt="${postData.title}">
                             <p class="post_description">
                                 ${postData.description}
