@@ -4,6 +4,7 @@
 
 {% block customjs %}
 <script>
+    let csrftoken = getCookie('csrftoken');
     let requestURL = "{% url 'api:profile-detail' 0 %}".slice(0, -2)
 
 $(document).ready(function() {
@@ -14,6 +15,9 @@ $(document).ready(function() {
     formData = new FormData(this);
     $.ajax({
       url: requestURL + {{ pk }} + "/",
+      headers: {
+        'X-CSRFToken': csrftoken
+        },
       method: 'PATCH',
       data: formData,
       success: function (response) {

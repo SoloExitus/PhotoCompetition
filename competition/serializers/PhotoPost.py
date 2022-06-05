@@ -8,14 +8,14 @@ from competition.services import is_liked_post
 
 class PhotoPostListSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
-    author = UserSerializer(source='user', read_only=True)
-    preview_image = serializers.ImageField(read_only=True)
+    author = UserSerializer(source='user')
+    preview_image = serializers.ImageField()
 
     class Meta:
         model = PhotoPost
         fields = ['id', 'title', 'description', 'is_liked', 'updated_at', 'created_at', 'full_image', 'preview_image',
                   'state', 'total_likes', 'total_comments', 'author']
-        read_only_fields = ['updated_at', 'state', 'likes_count', 'comments_count', 'author']
+        read_only_fields = ['is_liked', 'updated_at', 'state', 'likes_count', 'comments_count', 'author', 'preview_image']
 
     def get_is_liked(self, instance) -> bool:
         """Проверяет, лайкнул ли `request.user` post.
@@ -25,7 +25,7 @@ class PhotoPostListSerializer(serializers.ModelSerializer):
 
 
 class PhotoPostInfoSerializer(serializers.ModelSerializer):
-    is_liked = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = PhotoPost
@@ -39,7 +39,7 @@ class PhotoPostInfoSerializer(serializers.ModelSerializer):
 
 
 class PhotoPostDetailSerializer(PhotoPostListSerializer):
-    comments = PostCommentSerializer(many=True)
+    comments = PostCommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = PhotoPost

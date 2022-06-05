@@ -25,12 +25,13 @@
                   let post_image_href = urlpost + postData.id
                   if (postData.state === 'new')
                       post_image_href = '#'
+
                 const post = `
                 <div class="post-${postData.id} col-md-4 col-6 card" >
                     <div class="card-header">
                         <h4> ${postData.title} </h4>
 
-                        <a href="${post_image_href}" class="d-block mb-4 h-100 post_img_container">
+                        <a href="${urledit + postData.id}" class="d-block mb-4 h-100 post_img_container">
                             <img class="img-fluid img-thumbnail" src="${postData.preview_image}"  width="100%" alt="${postData.title}">
                             <p class="post_description">
                                 ${postData.description}
@@ -50,8 +51,8 @@
                             </div>
                             <div class="block button">
                                 <button type="button" class="btn btn-danger" onclick = 'remove(${postData.id})'>Remove</button>
-                                <a href="${urledit + postData.id}">
-                                    <button type="button" class="btn btn-warning">Edit</button>
+                                <a href="${post_image_href}">
+                                    <button type="button" class="btn btn-warning">Detail</button>
                                 </a>
                             </div>
                         </div>

@@ -2,7 +2,7 @@ from django.views.generic.base import TemplateView
 
 from rest_framework.permissions import IsAuthenticated
 
-from competition.forms import PostForm
+from competition.forms import CreatePostForm, UpdatePostForm
 
 from competition.models import PhotoPost
 
@@ -44,7 +44,7 @@ class PhotoPostCreateView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['pageTitle'] = 'Create Post'
-        context['form'] = PostForm()
+        context['form'] = CreatePostForm()
         return context
 
 
@@ -57,5 +57,5 @@ class PhotoPostEditView(TemplateView):
         post = PhotoPost.objects.get(id=pk)
         context = super().get_context_data(**kwargs)
         context['pageTitle'] = 'Edit Post'
-        context['form'] = PostForm(instance=post)
+        context['form'] = UpdatePostForm(instance=post)
         return context

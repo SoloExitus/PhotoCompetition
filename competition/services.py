@@ -1,11 +1,14 @@
 from django.contrib.auth import get_user_model
+
 from service_objects.services import Service
-from competition.models import PhotoPost, Like, Comment
+
+from competition.models import PhotoPost, Like, Comment, PhotoPostState
+from competition.forms import UpdatePostForm
 
 
-def editpost(request, pk):
+def updatepost(request, pk) -> bool:
     user = request.user
-    post = PhotoPost.objects.get(id=pk)
+    post = PhotoPost.objects.get(pk=pk)
 
     if not post:
         return False
@@ -13,18 +16,24 @@ def editpost(request, pk):
     if not user.id == post.user.id:
         return False
 
-    print(request.data)
-    title = request.data["text"]
-    description = request.data["description"]
-    full_image = request.data["full_image"]
+    old_image = post.full_image
 
-    post.title = title
-    post.description = description
+    form = UpdatePostForm(request.POST, request.FILES, instance=post)
+    if form.is_valid():
+        new_post = form.save(commit=False)
+        new_image = new_post.full_image
 
-    post.full_image = full_image
+        if old_image != new_image:
+            new_post.previous_image = old_image
+            new_post.state = PhotoPostState.NEW
 
-    post.save()
-    return True
+            post.comments.all().delete()
+            post.likes.all().delete()
+
+        post.save()
+        return True
+
+    return False
 
 
 def is_liked_post(instance, user) -> bool:

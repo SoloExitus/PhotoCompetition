@@ -1,13 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from competition.models import PhotoPost, Comment, PhotoPostState
+from competition.models import PhotoPost, Comment, PhotoPostState, Like
 from competition.permissions import AuthorAllStaffChange, IsAuthorCommentChange
 from competition.serializers.PhotoPost import PhotoPostListSerializer, PhotoPostDetailSerializer
 from competition.serializers.Comment import CommentsSerializer
 from competition.mixins import LikePostMixin
-from competition.services import editpost, destroy_comment, update_comment
-from competition.forms import PostForm
+from competition.services import updatepost, destroy_comment, update_comment
 
 
 class GalleryViewSet(LikePostMixin, viewsets.ReadOnlyModelViewSet):
@@ -39,39 +38,12 @@ class UserPostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        import pdb
-
-        pdb.set_trace()
         pk = kwargs['pk']
-        post = PhotoPost.objects.get(pk=pk)
+        update = updatepost(request, pk)
 
-        old_image = post.full_image
-
-        form = PostForm(data=request.data, instance=post)
-        if form.is_valid():
-            new_post = form.save(commit=False)
-            new_image = new_post.full_image
-            if old_image != new_image:
-                new_post.previous_image = old_image
-                new_post.state = PhotoPostState.NEW
-
-            post.save()
+        if update:
             return Response(status=status.HTTP_202_ACCEPTED)
-
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-        # do = editpost(request, kwargs['pk'])
-        # if do:
-        #     return Response(status=status.HTTP_202_ACCEPTED)
-        # return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class CommentsViewSet(viewsets.mixins.CreateModelMixin, viewsets.mixins.UpdateModelMixin,
