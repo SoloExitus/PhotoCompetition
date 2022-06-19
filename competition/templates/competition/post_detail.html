@@ -51,17 +51,12 @@
                 let content = document.createElement('div');
                 content.classList.add('flex-grow-1', 'flex-shrink-1');
 
-                let action_edit = "";
-                if ( requestUserId  === comment.author.id )
-                    action_edit = `
+                let cnahge_actions = ""
+                if ( requestUserId === comment.author.id && comment.comment_children.length === 0)
+                    cnahge_actions = `
                     <div class="mt-2 text-right">
                         <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Edit')">Edit</button>
                     </div>
-                    `
-
-                let remove_actions = "";
-                if ( requestUserId === comment.author.id && comment.comment_children.length === 0)
-                    remove_actions =`
                     <div class="mt-2 text-right">
                         <button class="btn btn-sm btn-danger" onclick = 'removeComment(${comment.id})'>Remove</button>
                     </div>
@@ -84,8 +79,7 @@
                                     <button class="btn btn-primary btn-sm shadow-none" type="button" onclick="DisplayCommentActionBlock(${comment.id}, 'Reply')">Reply</button>
                                 </div>
 
-                                ${ action_edit }
-                                ${ remove_actions }
+                                ${ cnahge_actions }
 
                             </div>
 

@@ -6,7 +6,7 @@ from competition.permissions import AuthorAllStaffChange, IsAuthorCommentChange
 from competition.serializers.PhotoPost import PhotoPostListSerializer, PhotoPostDetailSerializer
 from competition.serializers.Comment import CommentsSerializer
 from competition.mixins import LikePostMixin
-from competition.services import updatepost, destroy_comment, update_comment
+from competition.services import update_post, destroy_comment, update_comment
 
 
 class GalleryViewSet(LikePostMixin, viewsets.ReadOnlyModelViewSet):
@@ -39,7 +39,7 @@ class UserPostViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         pk = kwargs['pk']
-        update = updatepost(request, pk)
+        update = update_post(request, pk)
 
         if update:
             return Response(status=status.HTTP_202_ACCEPTED)

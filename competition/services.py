@@ -6,7 +6,7 @@ from competition.models import PhotoPost, Like, Comment, PhotoPostState
 from competition.forms import UpdatePostForm
 
 
-def updatepost(request, pk) -> bool:
+def update_post(request, pk) -> bool:
     user = request.user
     post = PhotoPost.objects.get(pk=pk)
 
