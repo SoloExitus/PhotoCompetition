@@ -69,6 +69,8 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']
+
 SOCIAL_AUTH_PIPELINE = (
 
     'social_core.pipeline.social_auth.social_details',
