@@ -41,6 +41,11 @@
         </div>
     </div>
 
+    <nav class="">
+        <ul class="pagination justify-content-center page-container">
+        </ul>
+    </nav>
+
 {% endblock main %}
 
 {% block customjs %}
@@ -48,9 +53,75 @@
         let urlInactiveLikeImage = "{% static '/img/like.png' %}";
         let urlActiveLikeImage = "{% static '/img/like_active.png' %}";
 
+        let galleryURL = "{% url 'api:gallery-list' %}" + "?page=" + 1;
+
+        let currentActivePage;
+
         $(document).ready(function() {
+            GetGalleryPagePosts(galleryURL);
+        });
+
+        function DisplayPagination(data)
+        {
+            elementCount = data.count
+
+            is_lastPage = true;
+            is_firstPage = true;
+
+            nextPageURL ='#'
+            if (data.next)
+            {
+                nextPageURL = data.next;
+                is_lastPage = false;
+            }
+
+            previousPageURL = '#'
+            if (data.previous) {
+                previousPageURL = data.previous;
+                is_firstPage = false;
+            }
+
+            let pagination = $('.pagination');
+            pagination.empty();
+
+            pagination.append( createPaginationElement('Previous', false, is_firstPage,  previousPageURL));
+
+            pagination.append( createPaginationElement(currentActivePage, true, false, '#'));
+
+            pagination.append( createPaginationElement('Next', false, is_lastPage, nextPageURL));
+        }
+
+        function createPaginationElement(content, is_active, is_disabled, url)
+        {
+            paginationElement = document.createElement('li');
+            paginationElement.classList.add('page-item');
+
+            if (is_active)
+            {
+                paginationElement.classList.add('active');
+            }
+
+            if (is_disabled)
+            {
+                paginationElement.classList.add('disabled');
+            }
+
+            paginationElement.innerHTML = `<a class="page-link" onclick='GetGalleryPagePosts("${url}")'>${content}</a>`
+            return paginationElement;
+        }
+
+        function GetGalleryPagePosts(queryURL)
+        {
+            let currentPageNumber = queryURL.slice(-1);
+
+            if (currentPageNumber === "/")
+                currentActivePage = 1;
+            else
+                currentActivePage = currentPageNumber;
+
+
             $.ajax({
-              url: "{% url 'api:gallery-list' %}",
+              url: queryURL,
               type: "GET",
               dataType: "json",
                 success: (data) => {
@@ -58,7 +129,9 @@
                   gallery.empty();
                   const urlpost= "{% url 'post' 0 %}".slice(0, -1);
 
-                  data.forEach(postData => {
+                  DisplayPagination(data)
+
+                  data.results.forEach(postData => {
                     let LikeUrl = urlInactiveLikeImage;
 
                     if (postData.is_liked)
@@ -89,7 +162,7 @@
                     console.log(error);
                   }
             });
-        });
+        }
 
         function SetPhotoPostInfo(post_id, data) {
             const postInfo = $(`#post-${post_id}-info`);

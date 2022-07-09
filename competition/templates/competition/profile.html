@@ -20,7 +20,7 @@
                const urlpost= "{% url 'post' 0 %}".slice(0, -1);
                const urledit= "{% url 'edit' 0 %}".slice(0, -1);
 
-              data.forEach(postData => {
+              data.results.forEach(postData => {
 
                   let post_image_href = urlpost + postData.id
                   if (postData.state === 'new')
@@ -81,7 +81,6 @@
                 type: 'DELETE',
                 success: (data) => {
                     $(`.post-${postId}`).remove()
-                    //$(".post-container").remove($(`.post${postId}`));
                 },
                 error: (error) => {
                     console.log(error);

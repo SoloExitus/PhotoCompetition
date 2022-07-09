@@ -16,6 +16,9 @@ class User(AbstractUser):
     def __str__(self) -> str:
         return self.username
 
+    class Meta:
+        ordering = ('id',)
+
 
 class PhotoPostState(object):
     NEW = 'new'
@@ -65,6 +68,9 @@ class PhotoPost(models.Model):
         default='placeholders/postImage.png',
         verbose_name='Previous image'
     )
+
+    class Meta:
+        ordering = ('created_at',)
 
     @property
     def total_likes(self):

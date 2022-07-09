@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from competition.models import PhotoPost, Comment, PhotoPostState, Like
+from competition.models import PhotoPost, PhotoPostState
 from competition.permissions import AuthorAllStaffChange, IsAuthorCommentChange
 from competition.serializers.PhotoPost import PhotoPostListSerializer, PhotoPostDetailSerializer
 from competition.serializers.Comment import CommentsSerializer
