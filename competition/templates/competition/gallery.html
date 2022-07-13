@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <nav class="">
+    <nav class="mt-4">
         <ul class="pagination justify-content-center page-container">
         </ul>
     </nav>
@@ -112,14 +112,6 @@
 
         function GetGalleryPagePosts(queryURL)
         {
-            let currentPageNumber = queryURL.slice(-1);
-
-            if (currentPageNumber === "/")
-                currentActivePage = 1;
-            else
-                currentActivePage = currentPageNumber;
-
-
             $.ajax({
               url: queryURL,
               type: "GET",
@@ -129,7 +121,14 @@
                   gallery.empty();
                   const urlpost= "{% url 'post' 0 %}".slice(0, -1);
 
-                  DisplayPagination(data)
+                  let currentPageNumber = queryURL.slice(-1);
+
+                if (currentPageNumber === "/")
+                    currentActivePage = 1;
+                else
+                    currentActivePage = currentPageNumber;
+
+                  DisplayPagination(data);
 
                   data.results.forEach(postData => {
                     let LikeUrl = urlInactiveLikeImage;

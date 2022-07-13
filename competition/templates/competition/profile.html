@@ -4,13 +4,28 @@
 {% block main %}
     <div class="post-container row justify-content-around gallery">
     </div>
+
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center page-container">
+        </ul>
+    </nav>
 {% endblock main %}
 
 {% block customjs %}
     <script>
+
+        let currentActivePage;
+
+        const UserProfileURL = "{% url 'api:profile-list' %}";
+
         $(document).ready(function() {
-        $.ajax({
-          url: "{% url 'api:profile-list' %}",
+            GetUserProfilePage(UserProfileURL);
+        });
+
+        function GetUserProfilePage(queryURL)
+        {
+            $.ajax({
+          url: queryURL,
           type: "GET",
           dataType: "json",
            success: (data) => {
@@ -19,6 +34,15 @@
 
                const urlpost= "{% url 'post' 0 %}".slice(0, -1);
                const urledit= "{% url 'edit' 0 %}".slice(0, -1);
+
+               let currentPageNumber = queryURL.slice(-1);
+
+                if (currentPageNumber === "/")
+                    currentActivePage = 1;
+                else
+                    currentActivePage = currentPageNumber;
+
+               DisplayPagination(data);
 
               data.results.forEach(postData => {
 
@@ -67,7 +91,57 @@
                 console.log(error);
               }
             });
-        });
+        }
+
+
+        function DisplayPagination(data)
+        {
+            elementCount = data.count
+
+            is_lastPage = true;
+            is_firstPage = true;
+
+            nextPageURL ='#'
+            if (data.next)
+            {
+                nextPageURL = data.next;
+                is_lastPage = false;
+            }
+
+            previousPageURL = '#'
+            if (data.previous) {
+                previousPageURL = data.previous;
+                is_firstPage = false;
+            }
+
+            let pagination = $('.pagination');
+            pagination.empty();
+
+            pagination.append( createPaginationElement('Previous', false, is_firstPage,  previousPageURL));
+
+            pagination.append( createPaginationElement(currentActivePage, true, false, '#'));
+
+            pagination.append( createPaginationElement('Next', false, is_lastPage, nextPageURL));
+        }
+
+        function createPaginationElement(content, is_active, is_disabled, url)
+        {
+            paginationElement = document.createElement('li');
+            paginationElement.classList.add('page-item');
+
+            if (is_active)
+            {
+                paginationElement.classList.add('active');
+            }
+
+            if (is_disabled)
+            {
+                paginationElement.classList.add('disabled');
+            }
+
+            paginationElement.innerHTML = `<a class="page-link" onclick='GetGalleryPagePosts("${url}")'>${content}</a>`
+            return paginationElement;
+        }
 
 
         function remove(postId){
