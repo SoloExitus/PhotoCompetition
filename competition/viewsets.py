@@ -1,5 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 from competition.models import PhotoPost, PhotoPostState
 from competition.permissions import AuthorAllStaffChange, IsAuthorCommentChange
@@ -14,6 +16,11 @@ class GalleryViewSet(LikePostMixin, viewsets.ReadOnlyModelViewSet):
      provides default `list` and `retrieve` actions and like/unlike actions.
     """
     queryset = PhotoPost.objects.filter(state=PhotoPostState.APPROVED)
+
+    search_fields = ['user__username', 'title', 'description']
+    #filterset_fields = ['total_likes', 'published_at', 'total_comments']
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend ]
+    ordering_fields = ['total_likes', 'published_at', 'total_comments']
 
     def get_serializer_class(self):
         if self.action == 'list':

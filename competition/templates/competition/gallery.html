@@ -7,8 +7,11 @@
       <li><a href="{% url 'main' %}" class="nav-link px-2 link-dark">Competition</a></li>
     </ul>
 
-    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
-      <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
+    <form id="search_form" name="Search" class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+        {% csrf_token %}
+      <input id="SearchQuery" name="SearchQuery" type="text" class="form-control" placeholder="Search..." aria-label="Search">
+        <input type="submit" value="Search">
+        <input type="button" onclick="Drop()" value="Drop">
     </form>
 
     <div class="dropdown text-end">
@@ -50,27 +53,42 @@
 
 {% block customjs %}
     <script>
-        let urlInactiveLikeImage = "{% static '/img/like.png' %}";
-        let urlActiveLikeImage = "{% static '/img/like_active.png' %}";
+        const urlInactiveLikeImage = "{% static '/img/like.png' %}";
+        const urlActiveLikeImage = "{% static '/img/like_active.png' %}";
 
-        let galleryURL = "{% url 'api:gallery-list' %}" + "?page=" + 1;
+        //let galleryURL = "{% url 'api:gallery-list' %}" + "?page=" + 1;
+        const galleryURL = "{% url 'api:gallery-list' %}";
+        const galleryURLWithFirstPage = galleryURL + "?page=" + 1;
+        const galleryURLWithQuery = galleryURL + "?search=";
 
         let currentActivePage;
 
         $(document).ready(function() {
-            GetGalleryPagePosts(galleryURL);
+            GetGalleryPagePosts(galleryURLWithFirstPage);
         });
 
-        function DisplayPagination(data)
+        function Drop()
         {
+            document.forms.Search.elements.SearchQuery.value = ""
+             GetGalleryPagePosts(galleryURLWithFirstPage);
+        }
+
+        document.getElementById('search_form').addEventListener('submit',  function(event){
+            const searchQuery = document.forms.Search.elements.SearchQuery.value;
+
+            GetGalleryPagePosts(galleryURLWithQuery + searchQuery);
+
+            event.preventDefault();
+        })
+
+        function DisplayPagination(data) {
             elementCount = data.count
 
             is_lastPage = true;
             is_firstPage = true;
 
-            nextPageURL ='#'
-            if (data.next)
-            {
+            nextPageURL = '#'
+            if (data.next) {
                 nextPageURL = data.next;
                 is_lastPage = false;
             }
@@ -84,11 +102,11 @@
             let pagination = $('.pagination');
             pagination.empty();
 
-            pagination.append( createPaginationElement('Previous', false, is_firstPage,  previousPageURL));
+            pagination.append(createPaginationElement('Previous', false, is_firstPage, previousPageURL));
 
-            pagination.append( createPaginationElement(currentActivePage, true, false, '#'));
+            pagination.append(createPaginationElement(currentActivePage, true, true, '#'));
 
-            pagination.append( createPaginationElement('Next', false, is_lastPage, nextPageURL));
+            pagination.append(createPaginationElement('Next', false, is_lastPage, nextPageURL));
         }
 
         function createPaginationElement(content, is_active, is_disabled, url)
@@ -123,7 +141,9 @@
 
                   let currentPageNumber = queryURL.slice(-1);
 
-                if (currentPageNumber === "/")
+                  console.log()
+
+                if (currentPageNumber === "/" || isNaN(currentPageNumber))
                     currentActivePage = 1;
                 else
                     currentActivePage = currentPageNumber;
