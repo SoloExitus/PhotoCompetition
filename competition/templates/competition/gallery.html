@@ -1,5 +1,7 @@
 {% extends 'competition/base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% load static %}
 {% block header %}
 
@@ -9,6 +11,7 @@
 
     <form id="search_form" name="Search" class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
         {% csrf_token %}
+        {{ form|crispy }}
       <input id="SearchQuery" name="SearchQuery" type="text" class="form-control" placeholder="Search..." aria-label="Search">
         <input type="submit" value="Search">
         <input type="button" onclick="Drop()" value="Drop">

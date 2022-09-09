@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'channels',
+
     'imagekit',
     'django_fsm',
     'rest_framework',
@@ -49,6 +51,7 @@ INSTALLED_APPS = [
     'django_filters',
 
     'competition.apps.CompetitionConfig',
+    'notifications.apps.NotificationsConfig',
 ]
 
 MIDDLEWARE = [
@@ -116,6 +119,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'photocompetition.wsgi.application'
+ASGI_APPLICATION = 'photocompetition.asgi.application'
 
 
 # Database
@@ -138,6 +142,28 @@ DATABASES = {
         'PORT': config('DATABASES_PORT', default='5432')
     }
 }
+
+# REDIS related settings
+REDIS_HOST = config('REDIS_HOST', default='0.0.0.0')
+REDIS_PORT = config('REDIS_PORT', default='6379')
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [(REDIS_HOST, int(REDIS_PORT))],
+        },
+    },
+}
+
+CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT #+ '/0'
+#BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+#CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT #+ '/0'
+#CELERY_ACCEPT_CONTENT = ['application/json']
+#CELERY_TASK_SERIALIZER = 'json'
+#CELERY_RESULT_SERIALIZER = 'json'
+
+BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 

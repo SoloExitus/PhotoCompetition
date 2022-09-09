@@ -5,6 +5,24 @@ from service_objects.services import Service
 from competition.models import PhotoPost, Like, Comment, PhotoPostState
 from competition.forms import UpdatePostForm
 
+from notifications.tasks import send_notice
+
+
+def like_post(post, user):
+    if user.id == post.user.id or not user.is_authenticated:
+        return
+
+    like, is_created = Like.objects.get_or_create(post=post, user=user)
+
+    # notification like
+    if like:
+        send_notice.delay()
+
+
+
+def unlike_post(post, user):
+    Like.objects.get(post=post, user=user).delete()
+
 
 def update_post(request, pk) -> bool:
     user = request.user
