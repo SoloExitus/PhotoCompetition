@@ -8,11 +8,11 @@ app = Celery('notification')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-app.conf.beat_schedule = {
-    'all_user_notifications': {
-        'task': 'notices.tasks.send_notification',
-        'schedule': 5.0,
-    }
-}
+# app.conf.beat_schedule = {
+#     'everyone_notification': {
+#         'task': 'notices.tasks.send_notification_everyone',
+#         'schedule': 5.0,
+#     }
+# }
 
 app.autodiscover_tasks()

@@ -5,7 +5,7 @@ from service_objects.services import Service
 from competition.models import PhotoPost, Like, Comment, PhotoPostState
 from competition.forms import UpdatePostForm
 
-from notifications.tasks import send_notice
+from notifications.tasks import send_like_notification
 
 
 def like_post(post, user):
@@ -16,7 +16,7 @@ def like_post(post, user):
 
     # notification like
     if like:
-        send_notice.delay()
+        send_like_notification.delay(user.id, post.id, post.user.id)
 
 
 
